@@ -21,15 +21,18 @@
 title: Sushant Padha's homepage
 email: 24b1057@iitb.ac.in
 description: >- # this means to ignore newlines until "baseurl:"
-  ..
+  ...
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://sushantpadha.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  sushantpadha
 
 # Build settings
+# theme: minima
 theme: jekyll-theme-cayman
+# remote_theme: pages-themes/cayman@v0.2.0
 plugins:
   - jekyll-feed
+  - jekyll-remote-theme
 incremental: true
 profile: true
 
