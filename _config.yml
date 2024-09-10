@@ -1,3 +1,5 @@
 theme: jekyll-theme-cayman
 title: Sushant Padha's homepage
 description: ...
+incremental: true
+profile: true
