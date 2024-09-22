@@ -35,6 +35,8 @@ plugins:
   - jekyll-remote-theme
 incremental: true
 profile: true
+livereload: true
+force_polling: true  # else nested files are not watched
 
 # Exclude from processing.
 # The following items will not be processed, by default.
