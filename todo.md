@@ -12,3 +12,5 @@
   - [ ] Other photos
 
 - [ ] Add scrolling, changing background style
+  - [ ] Implement video controls for better user experience
+  - [ ] Add tooltips so user can hover over images videos to gain info

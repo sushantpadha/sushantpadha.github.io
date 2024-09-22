@@ -1,0 +1,261 @@
+:root {
+  --primary-color: #00FFFF;
+  /* Cyan */
+  --secondary-color: #FF4081;
+  /* Pink */
+  --background-color: #121212;
+  /* Very Dark Gray */
+  --surface-color: #1E1E1E;
+  /* Dark Gray */
+  --text-color: #E0E0E0;
+  /* Light Gray */
+  --text-color-secondary: #9E9E9E;
+  /* Medium Gray */
+  --accent-color: #7C4DFF;
+  /* Purple */
+  --callout-color: #2C2C2C;
+  /* Slightly lighter than surface color */
+}
+
+/*
+media: 40% width, 16:9 ratio
+*/
+
+body,
+html {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.content {
+  flex: 2;
+  padding: 2rem;
+  max-width: 55%;
+  background-color: var(--surface-color);
+}
+
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 3px;
+  line-height: 2;
+  color: var(--primary-color);
+}
+
+h2,
+h3 {
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--primary-color);
+}
+
+.media-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background-color: var(--background-color);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.media-container {
+  width: 60%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.media-container::before {
+  content: "";
+  display: block;
+  padding-top: 56.25%;
+  /* 16:9 Aspect Ratio */
+}
+
+.media-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.media-item.active {
+  opacity: 1;
+}
+
+.section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
+
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.feature-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.feature-list li:before {
+  content: "🏎️";
+  line-height: 1.8;
+  margin-right: 0.5rem;
+}
+
+.team-members {
+  list-style-type: none;
+  padding: 1rem;
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  position: relative;
+}
+
+.team-member::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  width: 20px;
+  height: 20px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.team-member#narendra::before {
+  content: "🏎️";
+}
+
+.team-member#sushant::before {
+  content: "🖥️";
+}
+
+.team-member#vallabh::before {
+  content: "🔧";
+}
+
+.team-member#shivansh::before {
+  content: "🔋";
+}
+
+.team-member-info {
+  flex-grow: 1;
+}
+
+.team-member-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.team-member-role {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: var(--secondary-color);
+  margin-bottom: 0.5rem;
+}
+
+.team-member-description {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.team-member img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-color);
+  margin-left: 1rem;
+}
+
+.dictionary-callout {
+  background-color: var(--callout-color);
+  border-left: 4px solid var(--accent-color);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-family: 'Merriweather', serif;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dictionary-word {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.dictionary-phonetic {
+  font-size: 1rem;
+  color: var(--text-color-secondary);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.dictionary-part-of-speech {
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.dictionary-definition {
+  font-size: 1rem;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.dictionary-example {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  font-style: italic;
+  margin-left: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column-reverse;
+  }
+
+  .content {
+    max-width: 100%;
+  }
+
+  .media-wrapper {
+    height: auto;
+    position: relative;
+    padding: 2rem 0;
+  }
+
+  .media-container {
+    width: 80%;
+  }
+}
