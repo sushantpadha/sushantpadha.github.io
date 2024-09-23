@@ -27,13 +27,33 @@ permalink: /levitas/
     <div class="container">
         <div class="media-wrapper">
             <div class="media-container">
-                <img class="media-item active" src="assets/image1.jpg" alt="alt-text">
-                <video class="media-item" loop playsinline autoplay>
-                    <source src="assets/demo-video.mp4" type="video/mp4">
+
+                <video class="media-item active" loop playsinline controls>
+                    <source src="assets/Levitas_An_Xlr8_Project.mp4" type="video/mp4">
                 </video>
-                <img class="media-item" src="assets/image2.jpg" alt="alt-text">
-                <img class="media-item" src="assets/image3.jpg" alt="alt-text">
-                <img class="media-item" src="assets/image4.jpg" alt="alt-text">
+
+                <video class="media-item" loop playsinline controls>
+                    <source src="assets/key_features.mp4" type="video/mp4">
+                </video>
+
+                <img class="media-item" src="assets/how_it_works.jpeg" alt="How It Works">
+
+                <img class="media-item" src="assets/source-code-math.jpeg" alt="Source Code">
+
+                <img class="media-item" src="assets/BTS/universal-joint-attempts.jpeg" alt="BTS">
+
+
+                <img class="media-item" src="assets/Additional_help_1.jpeg" alt="Tutorial 1">
+                <img class="media-item" src="assets/Additional_help_2.jpeg" alt="Tutorial 2">
+
+                <img class="media-item" src="assets/acknowledgements.jpeg" alt="The Final Run">
+
+                <img class="media-item" src="assets/the_team.jpeg" alt="The Team">
+
+                <img class="media-item" src="assets/acknowledgements.jpeg" alt="Acknowledgements">
+
+                <img class="media-item" src="assets/whats_next.jpeg" alt="What's Next">
+                <img class="media-item" src="assets/whats_next.jpeg" alt="Gallery">
             </div>
         </div>
         <div class="content">
@@ -47,14 +67,18 @@ permalink: /levitas/
                     <div class="dictionary-example">"Propter levitatem et gloriae cupiditatem." - For the sake of
                         fickleness and desire for glory.</div>
                 </div>
-                <p>Welcome to our innovative RC Car project. Watch the demo video to see it in action!</p>
+                Welcome to the homepage of Team Levitas.<br><br>
+                This is about how we made a WiFi-based RC car that is
+                controlled by an app (designed by us 🫰),
+                has a four-wheel drive employing the axle mechanism at lesser angles (&lt;45°) and switching to
+                differential steering after that (harder than we initially thought)
+                <br><br>
+                <div class="inside-joke">And all of that in two weeks, just in time for midsems 💪</div>
             </section>
             <section class="section" data-media="1">
-                <h2>Behind the Scenes</h2>
-                <p>Take a peek into our development and design processes employed by us.</p>
-            </section>
-            <section class="section" data-media="2">
-                <h2>Key Features</h2>
+                <h2>Unique Features</h2>
+                <span class="inside-joke">...what makes us different from the rest of the '4-wheel-drive
+                    charlies'...</span>
                 <ul class="feature-list">
                     <li>Four wheel drive along with a servo based axle mechanism</li>
                     <li>A hybrid steering mechanism that uses both differential and axle steering methods</li>
@@ -65,26 +89,193 @@ permalink: /levitas/
                     <li>Provides granular and responsive control for the driver</li>
                 </ul>
             </section>
-            <section class="section" data-media="3">
+            <section class="section" data-media="2">
                 <h2>How It Works</h2>
-                <p>Our RC Car uses a Raspberry Pi Pico W as its brain, controlling high-torque motors and processing
-                    signals sent from a controller mobile app, in real time.</p>
+                <p>
+                    Our RC Car uses a Raspberry Pi Pico W as its brain, controlling high-torque motors and processing
+                    signals sent from a controller mobile app, in real time.
+                <ul>
+                    <li>
+                        The app provides a simple joystick interface thanks to the <a
+                            href="https://github.com/controlwear/virtual-joystick-android"
+                            class="external-link">virtual-joystick-android</a> library.
+                    </li>
+                    <li>
+                        The Raspberry Pi Pico W connects to the app via a static IP and port using either an external
+                        WiFi network, or with the Pico's onboard module as a soft access point.
+                    </li>
+                    <li>
+                        We send JSON packets over the WiFi network that encode the desired angle and speed to move the
+                        bot at.
+                    </li>
+                    <li>
+                        The code on the Pico then processes these instructions, and using some <a
+                            href="assets/crazy-math.jpeg" class="external-link">
+                            <span class="image-tooltip">
+                                crazy math
+                                <span class="tooltip-content">
+                                    <img src="assets/crazy-math.jpeg" alt="crazy math" class="tooltip-image">
+                                    <span class="tooltip-text">...</span>
+                                </span>
+                            </span>
+                        </a>
+                        converts to signal-based instructions.
+                    </li>
+                    <li>
+                        The signals are then sent to the motor driver and servo to steer the car in the desired
+                        direction.
+                    </li>
+                    <li class="inside-joke">
+                        A skilled driver then uses said tools to outplay and outskill the competition 😎
+                    </li>
+                </ul>
+                </p>
+            </section>
+            <section class="section" data-media="3">
+                <h2>Source Code</h2>
+                <p>
+                    Consists of two sections, the controller app and the raspberry pi code
+                <ul>
+                    <li>
+                        <h3><a class="external-link"
+                                href="https://github.com/sushantpadha/ControllerTest">ControllerTest</a></h3>
+                        This is the source code for the custom controller app that provides a joystick interface using
+                        the <a href="https://github.com/controlwear/virtual-joystick-android"
+                            class="external-link">virtual-joystick-android</a> library, built using Android Studio.
+                    </li>
+                    <li>
+                        <h3><a class="external-link" href="https://github.com/sushantpadha/levitas">levitas</a></h3>
+                        This is the source code for the microcontroller that parses the
+                        instructions sent from the app, converts it into signal-based instructions that are then
+                        transmitted to relevant electronic components.<br><br>
+                        It is written specifically for this bot (not taken from the XLR8 tutorial), to work with the
+                        hybrid steering mechanism at maximum possible
+                        torque and efficiency. It was written in Arduino IDE with the libraries
+                        and compilation arguments provided by the XLR8 team, additionally, the
+                        <a href="https://arduinojson.org/" class="external-link">ArduinoJson</a> library is used to
+                        parse the JSON messages.
+                    </li>
+                </ul>
+                </p>
             </section>
             <section class="section" data-media="4">
-                <h2>Tutorial</h2>
-                <p>This section describes a brief walkthrough of how to build our bot.</p>
+                <h2>Behind the Scenes</h2>
+                <p>
+                <div class="casual-warning-callout">
+                    <div class="casual-warning-callout-title">Disclaimer!</div>
+                    <div class="casual-warning-callout-content">
+                        Lots of melodrama ahead, skip to the tutorial if you ainʼt jobless 😴.<br>
+                        <span class="inside-joke">or if it is the eve of the final XLR8 run...</span>
+                    </div>
+                </div>
+                <span>Take a peek into the development and design processes employed by us <a class="external-link"
+                        href="https://github.com/sushantpadha/sushantpadha.github.io/tree/main/levitas/assets/BTS">here.</a></span>
+                </p>
             </section>
             <section class="section" data-media="5">
-                <h2>Source Code</h2>
+                <h2>Tutorial</h2>
+                <span class="inside-joke">...work in progress... will keep updating it as we figure it out
+                    ourselves...</span><br><br>
+                Steps to follow in order to replicate our success:
+                <ul>
+                    <li>
+                        Additional help resources are to the right 👉
+                    </li>
+                    <li>
+                        <h3>Materials required (from top left):</h3>
+                        <a href="assets/Materials_required_1.jpeg" class="external-link">
+                            <span class="image-tooltip">
+                                First
+                                <span class="tooltip-content">
+                                    <img src="assets/Materials_required_1.jpeg" alt="Materials required 1"
+                                        class="tooltip-image">
+                                    <span class="tooltip-text">
+                                        rim support, steering rack, sg90 towerpro servo motor, chassis, rim, plier, 3d
+                                        print filer, wire cutter, multimeter</span>
+                                </span>
+                            </span>
+                        </a>&emsp;&emsp;&emsp;&emsp;&emsp;
+
+                        <a href="assets/Materials_required_2.jpeg" class="external-link">
+                            <span class="image-tooltip">Second
+                                <span class="tooltip-content">
+                                    <img src="assets/Materials_required_2.jpeg" alt="Materials required 2"
+                                        class="tooltip-image">
+                                    <span class="tooltip-text">
+                                        tyre 7x2 cm two pieces, screwdriver (-), servo_fitted_chassis, soldering gun and
+                                        wire,
+                                        insulating tape, allen key (3mm and 2.5mm 5 nos. each), washer x1, screws and
+                                        nuts (3mm
+                                        and 2.5mm 10 each), rpi pico 2 w, allen key, universal joint x2, male to female
+                                        jumpers</span>
+                                </span>
+                            </span>
+                        </a>&emsp;&emsp;&emsp;&emsp;&emsp;
+
+                        <a href="assets/Materials_required_3.jpeg" class="external-link">
+                            <span class="image-tooltip">Third
+                                <span class="tooltip-content">
+                                    <img src="assets/Materials_required_3.jpeg" alt="Materials required 3"
+                                        class="tooltip-image">
+                                    <span class="tooltip-text">
+                                        female to female jumpers, male to male jumpers, tyres 7x4 2 pieces, screwdriver
+                                        (+), motors (300rpm x4), l clamps x4, li ion battery, switch, battery holder,
+                                        3.3v battery, main support for rims</span>
+                                </span>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <h3><a href="https://github.com/sushantpadha/sushantpadha.github.io/tree/main/levitas/assets/Mechanical_Design_files/" class="external-link">Mechanical Design Files</a></h3>
+                    </li>
+
+                    <li>
+                        <h3><a href="assets/tutorial_1.mp4" class="external-link">Tutorial Video 1</a></h3>
+                        <div class="video-container">
+                            <iframe src="assets/tutorial_1.mp4" allowfullscreen></iframe>
+                        </div>
+                    </li>
+                </ul>
             </section>
+
             <section class="section" data-media="6">
+                <ul>
+                    <li>
+                        <h3><a href="assets/tutorial_2.mp4" class="external-link">Tutorial Video 2</a></h3>
+                        <div class="video-container">
+                            <iframe src="assets/tutorial_2.mp4" allowfullscreen></iframe>
+                        </div>
+                    </li>
+                    <li>
+                        <h3><a href="https://erc-xlr8.notion.site/XLR8-Home-197268adf3694221af47be18b7e7148a"
+                                class="external-link">XLR8-Tutorial</a></h3>
+                    </li>
+                </ul>
+            </section>
+            <section class="section" data-media="7">
+                <h2>The Final Run</h2>
+                <p>
+                <h3><a href="assets/final-run-failures.mp4" class="external-link">Failures</a></h3>
+                <div class="video-container">
+                    <iframe src="assets/final-run-failures.mp4" allowfullscreen></iframe>
+                </div>
+
+                <h3><a href="assets/final-run-successes.mp4" class="external-link">Success</a></h3>
+                <div class="video-container">
+                    <iframe src="assets/final-run-successes.mp4" allowfullscreen></iframe>
+                </div>
+                </p>
+            </section>
+            <section class="section" data-media="8">
                 <h2>The Team</h2>
                 <ul class="team-members">
                     <li class="team-member" id="narendra">
                         <div class="team-member-info">
                             <div class="team-member-name">Narendra Aironi</div>
                             <div class="team-member-role">Team Maestro</div>
-                            <div class="team-member-description">Specialized in RC car mechanics and performance tuning.
+                            <div class="team-member-description">Specialized in RC car mechanics and performance
+                                tuning.
                                 Responsible for overall managing and delegating of tasks, and evaluating the maths
                                 required for the hybrid steering.
                             </div>
@@ -96,38 +287,79 @@ permalink: /levitas/
                             <div class="team-member-name">Sushant Padha</div>
                             <div class="team-member-role">Software Sage</div>
                             <div class="team-member-description">Focused on RC car control system and joystick user
-                                interface design. Responsible for writing code for the controller app, and code for the
+                                interface design. Responsible for writing code for the controller app, and code for
+                                the
                                 raspberry pi and interfacing them together with minimal latency and fine control.
                             </div>
                         </div>
-                        <img src="assets/narendra.jpeg" alt="Sushant Padha">
+                        <img src="assets/sushant.jpeg" alt="Sushant Padha">
                     </li>
                     <li class="team-member" id="vallabh">
                         <div class="team-member-info">
                             <div class="team-member-name">Vallabh Pardeshi</div>
                             <div class="team-member-role">Mechanical Maven</div>
-                            <div class="team-member-description">Focused on cutting the chassis and mechanical aspects
-                                of RC car design. Responsible for sourcing and fitting universal joints, creating the
+                            <div class="team-member-description">Focused on cutting the chassis and mechanical
+                                aspects
+                                of RC car design. Responsible for sourcing and fitting universal joints, creating
+                                the
                                 bar-based axle steering mechanism and modelling and 3D printing the wheel rim and
-                                ensuring they all fit in for well enough stability along with strength to overcome hard
+                                ensuring they all fit in for well enough stability along with strength to overcome
+                                hard
                                 impacts.
                             </div>
                         </div>
-                        <img src="assets/narendra.jpeg" alt="Vallabh Pardeshi">
+                        <img src="assets/vallabh.jpeg" alt="Vallabh Pardeshi">
                     </li>
                     <li class="team-member" id="shivansh">
                         <div class="team-member-info">
                             <div class="team-member-name">Shivansh .</div>
                             <div class="team-member-role">Electronics Wizard</div>
-                            <div class="team-member-description">Focused on the electronic components and interfacing
+                            <div class="team-member-description">Focused on the electronic components and
+                                interfacing
                                 them with each other reliably. Responsible for soldering the microcontroller and
                                 connecting with the motor drivers, power supply and those further with the servo and
                                 four motors, making it strong enough to bear strong impacts.
                             </div>
                         </div>
-                        <img src="assets/narendra.jpeg" alt="Shivansh .">
+                        <img src="assets/shivansh.jpeg" alt="Shivansh .">
                     </li>
                 </ul>
+            </section>
+            <section class="section" data-media="8">
+                <h2>Acknowledgements</h2>
+                <p>
+
+                <div>
+                    Huge thanks to the <a href="https://erciitb.github.io/" class="external-link">ERC</a> conveners and
+                    our
+                    mentor for making our first project at IIT Bombay enriching
+                    <span class="inside-joke">
+                        (and stressful too, but thats not their fault).
+                    </span><br>
+                    They were humble and always ready to help us, be it 3-D printing parts or replacing our Pico.
+                    We also acknowledge TL lab for its resourcefulness.
+                </div>
+
+                </p>
+            </section>
+            <section class="section" data-media="10">
+                <h2>What's Next?</h2>
+                <p>
+                    Some friendly suggestions for those attempting to replicate our design:
+                <ul>
+                    <li>Ensure proper alignment of the servo bar, unless you want to spend hours begging for it to work
+                        as needed. 🥲</li>
+                </ul>
+                </p>
+            </section>
+
+            <section class="section" data-media="11">
+                <h2>Gallery</h2>
+                <p>
+                    <span class="inside-joke">...work in progress... until then use <a
+                            href="https://github.com/sushantpadha/sushantpadha.github.io/tree/main/levitas/assets/"
+                            class="external-link">this.</a></span>
+                </p>
             </section>
         </div>
     </div>
