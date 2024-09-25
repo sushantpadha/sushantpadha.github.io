@@ -225,9 +225,10 @@ permalink: /levitas/
                             </span>
                         </a>
                     </li>
-                    
+
                     <li>
-                        <h3><a href="https://github.com/sushantpadha/sushantpadha.github.io/tree/main/levitas/assets/Mechanical_Design_files/" class="external-link">Mechanical Design Files</a></h3>
+                        <h3><a href="https://github.com/sushantpadha/sushantpadha.github.io/tree/main/levitas/assets/Mechanical_Design_files/"
+                                class="external-link">Mechanical Design Files</a></h3>
                     </li>
 
                     <li>
@@ -347,8 +348,20 @@ permalink: /levitas/
                 <p>
                     Some friendly suggestions for those attempting to replicate our design:
                 <ul>
+                    <li>Add bearings to the rim's hole. We didn't do it and faced a lot of alignment and speed issues
+                        (you might be able to see that our front tyres are a little tilted). But it is difficult to find
+                        that size of bearings.</li>
+                    <li>Try to find (we couldn't) half-threaded screws for the revolute joints. </li>
+                    <li>Explore ackermann steering geometry (it was too complex for this use case however)</li>
+                    <li>Increase the ground clearance (check our fails video to see why)</li>
+                    <li>Use good quality jumper wires unless you want it to disconnect in the middle of the <em>blind
+                            tunnel</em> obstacle.</li>
+                    <li>Use higher torque motors to be able to manoeuvre this beast.</li>
+                    <li>In the joystick app even if you move the control to 50% max speed, the car still doesnt move, so
+                        while making the app, add some offset in the software so you can easily control the speed while
+                        turning (otherwise the driver has a hard time handling it)</li>
                     <li>Ensure proper alignment of the servo bar, unless you want to spend hours begging for it to work
-                        as needed. 🥲</li>
+                        as needed. 🥲</li`>
                 </ul>
                 </p>
             </section>
