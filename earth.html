@@ -1,0 +1,89 @@
+---
+title: Earth
+permalink: /birthday
+---
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth</title>
+    <style>
+        body {
+            background-color: lightcyan;
+            font-size: 128px;
+        }
+
+        marquee {
+            font-family: cursive;
+            margin-top: 40px;
+            display: flex;
+        }
+        
+        .container {
+            display: grid;
+            grid: 1fr 1fr 1fr / auto-flow;
+        }
+
+        .happy {
+            flex: 0 0;
+            height: 2em;
+        }
+
+        .happy:hover {
+            color: darkorange;
+            font-size: 1.05em;
+            cursor: pointer;
+        }
+
+        .birthday:hover {
+            color: #D1768F;
+            font-size: 1.05em;
+            cursor: pointer;
+        }
+
+        .abhaya:hover {
+            color: rgb(221, 4, 69);
+            font-size: 1.05em;
+            cursor: pointer;
+        }
+
+        .bg {
+            z-index: -5;
+            opacity: 50%;
+            width: 100vw;
+            height: 100vh;
+            font-size: 0.1em;
+            position: absolute;
+            top: 0;
+            display: flexbox;
+            flex-direction: column;
+        }
+
+        .dance {
+            font-size: 5em;
+            text-align: center;
+            margin-right: 2em;
+            display: flex;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <marquee behavior="alternate" direction="left" scrollamount="20" class="happy"><span>Happy</span></marquee>
+        <marquee behavior="alternate" direction="right" scrollamount="20" class="birthday"><span>Birthday</span></marquee>
+        <marquee behavior="alternate" direction="left" scrollamount="20" class="abhaya"><span>Abhaya</span></marquee>
+    </div>
+    <!-- <div class="bg">
+        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance1">💃</marquee>
+        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance2">🕺</marquee>
+        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance3">💃</marquee>
+        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance4">🕺</marquee>
+    </div> -->
+</body>
+
+</html>
