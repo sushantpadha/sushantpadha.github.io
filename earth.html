@@ -10,44 +10,64 @@ permalink: /birthday
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!--
+    Cookie Font
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Cookie&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <style>
+        /* Note the color palette must be synced with the link below */
+        :root {
+            --bg: lavender;
+            --happy: darkorange;
+            --birthday: #5C9EAD;
+            --abhaya: #dd0445;
+            --alt-text: #326273;
+        }
+
         body {
-            background-color: lightcyan;
+            background-color: var(--bg);
             font-size: 128px;
         }
 
         marquee {
-            font-family: cursive;
+            font-family: "Cookie", cursive, serif;
+            text-align: center;
             margin-top: 40px;
             display: flex;
-        }
-        
-        .container {
-            display: grid;
-            grid: 1fr 1fr 1fr / auto-flow;
+            white-space: nowrap;
+            width: 95vw;
         }
 
-        .happy {
-            flex: 0 0;
-            height: 2em;
+        .floating-text {
+            font-size: 1.3em;
+            display: inline-block;
+        }
+
+        .floating-text:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 50px;
+            max-height: 100vh;
         }
 
         .happy:hover {
-            color: darkorange;
-            font-size: 1.05em;
-            cursor: pointer;
+            color: var(--happy);
         }
 
         .birthday:hover {
-            color: #D1768F;
-            font-size: 1.05em;
-            cursor: pointer;
+            color: var(--birthday);
         }
 
         .abhaya:hover {
-            color: rgb(221, 4, 69);
-            font-size: 1.05em;
-            cursor: pointer;
+            color: var(--abhaya);
         }
 
         .bg {
@@ -68,15 +88,63 @@ permalink: /birthday
             margin-right: 2em;
             display: flex;
         }
-        
+
+        #color-palette a {
+            font-size: 20px;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            color: var(--alt-text);
+            text-decoration: none;
+            font-style: italic;
+        }
+
+        #color-palette a:hover {
+            text-decoration: underline;
+            transform: scale(1.02);
+        }
     </style>
+    <script>
+        // window.onload = function () {
+        //     const el = document.querySelector('.happy');
+        //     const m = el.parentElement;
+
+        //     let left = true;
+        //     let x = 0;
+
+        //     m.addEventListener("mouseover", async (e) => {
+        //         x = e.clientX;
+        //         left = false;
+        //     });
+
+        //     m.addEventListener("mouseleave", async (e) => {
+        //         left = true;
+        //     });
+
+        //     m.addEventListener("mousedown", async (e) => {
+        //         console.log('mousedown');
+        //         console.log(e.target);
+        //         const x0 = e.clientX;
+        //         console.log(x0);
+        //         while (!left) {
+        //             console.log(`moved by: ${x - x0}`);
+        //         }
+        //     });
+        // }
+    </script>
 </head>
 
 <body>
     <div class="container">
-        <marquee behavior="alternate" direction="left" scrollamount="20" class="happy"><span>Happy</span></marquee>
-        <marquee behavior="alternate" direction="right" scrollamount="20" class="birthday"><span>Birthday</span></marquee>
-        <marquee behavior="alternate" direction="left" scrollamount="20" class="abhaya"><span>Abhaya</span></marquee>
+        <marquee behavior="alternate" direction="left" scrollamount="21" ><span class="floating-text happy">Happy</span></marquee>
+        <marquee behavior="alternate" direction="right" scrollamount="19" ><span class="floating-text birthday">Birthday</span>
+        </marquee>
+        <marquee behavior="alternate" direction="left" scrollamount="20" ><span class="floating-text abhaya">Abhaya</span></marquee>
+        <div id="color-palette">
+            <a href="https://coolors.co/e6e6fa-ff8c00-5c9ead-dd0445-326273" target="_blank">Check out this color
+                palette</a>
+        </div>
     </div>
     <!-- <div class="bg">
         <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance1">💃</marquee>
