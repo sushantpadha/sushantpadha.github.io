@@ -5,153 +5,192 @@ permalink: /birthday
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earth</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!--
-    Cookie Font
-    -->
-    <link href="https://fonts.googleapis.com/css2?family=Cookie&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Happy 19th Miss APS!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Note the color palette must be synced with the link below */
         :root {
-            --bg: lavender;
-            --happy: darkorange;
-            --birthday: #5C9EAD;
-            --abhaya: #dd0445;
-            --alt-text: #326273;
+            --lavender: #E6E6FA;
+            --soft-pink: #FFD1DC;
+            --deep-pink: #FF69B4;
+            --oswald-blue: #5C9EAD;
         }
 
         body {
-            background-color: var(--bg);
-            font-size: 128px;
-        }
-
-        marquee {
-            font-family: "Cookie", cursive, serif;
+            background-color: var(--lavender);
+            background: linear-gradient(180deg, var(--lavender) 0%, var(--soft-pink) 100%);
+            font-family: 'Fredoka', sans-serif;
             text-align: center;
-            margin-top: 40px;
-            display: flex;
-            white-space: nowrap;
-            width: 95vw;
-        }
-
-        .floating-text {
-            font-size: 1.3em;
-            display: inline-block;
-        }
-
-        .floating-text:hover {
-            transform: scale(1.05);
-            cursor: pointer;
-        }
-
-        .container {
+            color: #444;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 50px;
-            max-height: 100vh;
         }
 
-        .happy:hover {
-            color: var(--happy);
+        .content-box {
+            max-width: 450px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 3px solid var(--soft-pink);
+            margin-top: 20px;
         }
 
-        .birthday:hover {
-            color: var(--birthday);
+        h1 {
+            color: var(--deep-pink);
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
-        .abhaya:hover {
-            color: var(--abhaya);
+        .oswald-img {
+            width: 100%;
+            max-width: 250px;
+            border-radius: 15px;
+            margin: 20px 0;
         }
 
-        .bg {
-            z-index: -5;
-            opacity: 50%;
-            width: 100vw;
-            height: 100vh;
-            font-size: 0.1em;
-            position: absolute;
-            top: 0;
-            display: flexbox;
-            flex-direction: column;
-        }
-
-        .dance {
-            font-size: 5em;
-            text-align: center;
-            margin-right: 2em;
-            display: flex;
-        }
-
-        #color-palette a {
-            font-size: 20px;
-            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-            position: absolute;
-            bottom: 10px;
-            right: 15px;
-            color: var(--alt-text);
+        .button-link {
+            display: block;
+            background-color: var(--oswald-blue);
+            color: white;
             text-decoration: none;
-            font-style: italic;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            font-weight: 600;
+            transition: transform 0.1s;
         }
 
-        #color-palette a:hover {
-            text-decoration: underline;
-            transform: scale(1.02);
+        .button-link:active {
+            transform: scale(0.98);
+        }
+
+        .valentine-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--soft-pink);
+            position: relative;
+        }
+
+        .btn-group {
+            margin-top: 15px;
+            height: 100px; /* Space for the escaping button */
+        }
+
+        .yes-btn {
+            background: #FF69B4;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        #no-btn {
+            background: #999;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            position: absolute;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .lame-label {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 20px;
+        }
+
+        .grievance-link {
+            margin-top: 30px;
+            display: inline-block;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        /* Falling Decorations */
+        .decor {
+            position: fixed;
+            top: -50px;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
         }
     </style>
-    <script>
-        // window.onload = function () {
-        //     const el = document.querySelector('.happy');
-        //     const m = el.parentElement;
-
-        //     let left = true;
-        //     let x = 0;
-
-        //     m.addEventListener("mouseover", async (e) => {
-        //         x = e.clientX;
-        //         left = false;
-        //     });
-
-        //     m.addEventListener("mouseleave", async (e) => {
-        //         left = true;
-        //     });
-
-        //     m.addEventListener("mousedown", async (e) => {
-        //         console.log('mousedown');
-        //         console.log(e.target);
-        //         const x0 = e.clientX;
-        //         console.log(x0);
-        //         while (!left) {
-        //             console.log(`moved by: ${x - x0}`);
-        //         }
-        //     });
-        // }
-    </script>
 </head>
-
 <body>
-    <div class="container">
-        <marquee behavior="alternate" direction="left" scrollamount="21" ><span class="floating-text happy">Happy</span></marquee>
-        <marquee behavior="alternate" direction="right" scrollamount="19" ><span class="floating-text birthday">Birthday</span>
-        </marquee>
-        <marquee behavior="alternate" direction="left" scrollamount="20" ><span class="floating-text abhaya">Abhaya</span></marquee>
-        <div id="color-palette">
-            <a href="https://coolors.co/e6e6fa-ff8c00-5c9ead-dd0445-326273" target="_blank">Check out this color
-                palette</a>
-        </div>
-    </div>
-    <!-- <div class="bg">
-        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance1">💃</marquee>
-        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance2">🕺</marquee>
-        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance3">💃</marquee>
-        <marquee behavior="alternate" direction="down" scrollamount="7" class="dance" id="dance4">🕺</marquee>
-    </div> -->
-</body>
 
+    <div class="content-box">
+        <h1>Happy Birthday Miss APS!</h1>
+        <p>Feb 15th — A Big Blue World Celebration</p>
+
+        <img src="https://i.pinimg.com/236x/20/f9/a8/20f9a8a98b13008f6262ce4528f07d90.jpg" alt="Oswald Birthday" class="oswald-img">
+
+        <a href="https://photos.app.goo.gl/14C4i8hvdAT5tyWWA" class="button-link" target="_blank">
+            Nom Nom here
+        </a>
+
+        <div class="valentine-section">
+            <p>Me Valentine You?</p>
+            <div class="btn-group">
+                <button class="yes-btn" onclick="sayYes()">YES</button>
+                <button id="no-btn" onmouseover="moveNo()" onclick="moveNo()">NO</button>
+            </div>
+            <p class="lame-label">(this whole button thing is self-awaredly lame, I know)</p>
+        </div>
+
+        <p style="margin-top: 20px; font-weight: 600;">Enjoy your day (and your ice cream)! 🌹</p>
+        
+        <a href="https://forms.gle/3tUptWANKBpHqEAh9" class="grievance-link" target="_blank">File a Formal Grievance</a>
+    </div>
+
+    <script>
+        function moveNo() {
+            const btn = document.getElementById('no-btn');
+            // Random movement within the viewport
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+            
+            btn.style.position = 'fixed';
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+        }
+
+        function sayYes() {
+            alert("Excellent choice. See you tomorrow! ❤️");
+            for(let i = 0; i < 50; i++) {
+                setTimeout(spawnDecor, i * 100);
+            }
+        }
+
+        function spawnDecor() {
+            const el = document.createElement('div');
+            el.className = 'decor';
+            const items = ['🌹', '🍦', '💖', '🌸'];
+            el.innerHTML = items[Math.floor(Math.random() * items.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            el.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 5000);
+        }
+
+        // Slow background drift
+        setInterval(spawnDecor, 3000);
+    </script>
+</body>
 </html>
