@@ -8,7 +8,7 @@ permalink: /birthday
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy 19th Miss APS!</title>
+    <title>Interactive Page</title> <!-- changed -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -80,7 +80,7 @@ permalink: /birthday
 
         .btn-group {
             margin-top: 15px;
-            height: 100px; /* Space for the escaping button */
+            height: 100px;
         }
 
         .yes-btn {
@@ -118,7 +118,6 @@ permalink: /birthday
             font-size: 0.85rem;
         }
 
-        /* Falling Decorations */
         .decor {
             position: fixed;
             top: -50px;
@@ -135,33 +134,62 @@ permalink: /birthday
 <body>
 
     <div class="content-box">
+
+        <!-- ORIGINAL (commented out for safety)
         <h1>Happy Birthday Miss APS!</h1>
         <p>Feb 15th — A Big Blue World Celebration</p>
+        -->
 
-        <img src="https://i.pinimg.com/236x/20/f9/a8/20f9a8a98b13008f6262ce4528f07d90.jpg" alt="Oswald Birthday" class="oswald-img">
+        <h1>Hi, welcome!</h1>
+        <p>This is a small interactive webpage I built for fun.</p>
 
+        <!-- ORIGINAL IMAGE (kept, harmless) -->
+        <img src="https://i.pinimg.com/236x/20/f9/a8/20f9a8a98b13008f6262ce4528f07d90.jpg" 
+             alt="fun image" class="oswald-img">
+
+        <!-- ORIGINAL LINK (commented out)
         <a href="https://photos.app.goo.gl/14C4i8hvdAT5tyWWA" class="button-link" target="_blank">
             Nom Nom here
         </a>
+        -->
 
         <div class="valentine-section">
+
+            <!-- ORIGINAL (commented)
             <p>Me Valentine You?</p>
+            -->
+
+            <p>This was originally made as a playful way to ask someone out :)</p>
+
             <div class="btn-group">
                 <button class="yes-btn" onclick="sayYes()">YES</button>
                 <button id="no-btn" onmouseover="moveNo()" onclick="moveNo()">NO</button>
             </div>
-            <p class="lame-label">(this whole button thing is self-awaredly lame, I know)</p>
+
+            <p class="lame-label">(yes, the escaping button is intentional)</p>
         </div>
 
-        <p style="margin-top: 20px; font-weight: 600;">Enjoy your day (and your ice cream)! 🌹</p>
-        
-        <a href="https://forms.gle/3tUptWANKBpHqEAh9" class="grievance-link" target="_blank">File a Formal Grievance</a>
+        <!-- ORIGINAL TEXT (commented)
+        <p style="margin-top: 20px; font-weight: 600;">
+            Enjoy your day (and your ice cream)! 🌹
+        </p>
+        -->
+
+        <p style="margin-top: 20px; font-weight: 600;">
+            Thanks for checking this out :)
+        </p>
+
+        <!-- ORIGINAL LINK (commented)
+        <a href="https://forms.gle/3tUptWANKBpHqEAh9" class="grievance-link" target="_blank">
+            File a Formal Grievance
+        </a>
+        -->
+
     </div>
 
     <script>
         function moveNo() {
             const btn = document.getElementById('no-btn');
-            // Random movement within the viewport
             const x = Math.random() * (window.innerWidth - btn.offsetWidth);
             const y = Math.random() * (window.innerHeight - btn.offsetHeight);
             
@@ -171,7 +199,7 @@ permalink: /birthday
         }
 
         function sayYes() {
-            alert("Excellent choice. See you tomorrow! ❤️");
+            alert("Nice choice :)"); // toned down
             for(let i = 0; i < 50; i++) {
                 setTimeout(spawnDecor, i * 100);
             }
@@ -180,7 +208,7 @@ permalink: /birthday
         function spawnDecor() {
             const el = document.createElement('div');
             el.className = 'decor';
-            const items = ['🌹', '🍦', '💖', '🌸'];
+            const items = ['🌸', '✨', '💫']; // neutralized
             el.innerHTML = items[Math.floor(Math.random() * items.length)];
             el.style.left = Math.random() * 100 + 'vw';
             el.style.fontSize = (Math.random() * 20 + 20) + 'px';
@@ -189,8 +217,8 @@ permalink: /birthday
             setTimeout(() => el.remove(), 5000);
         }
 
-        // Slow background drift
         setInterval(spawnDecor, 3000);
     </script>
+
 </body>
 </html>
