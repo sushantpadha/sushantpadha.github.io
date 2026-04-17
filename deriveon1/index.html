@@ -1,0 +1,1467 @@
+---
+title: DeriveOn | A Project for DE 250, Spr' 26
+permalink: /deriveon1/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeriveOn - RC Car Kinematics Lab</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main:    #13100e;
+            --bg-panel:   #1c1814;
+            --bg-card:    #242018;
+            --accent:     #c9914a;
+            --accent-dim: rgba(201,145,74,0.15);
+            --accent-soft:#a07640;
+            --text-main:  #e8e0d4;
+            --text-secondary: #8a8278;
+            --border-color: #332d24;
+            --danger:  #b85450;
+            --success: #5a9e6f;
+            --radius:  10px;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 0; 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+        }
+
+        /* ── Transition Overlay ── */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg-main); z-index: 9999; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            transition: opacity 0.6s ease;
+        }
+        #loadingOverlay img {
+            width: 100px; height: 100px; border-radius: 15px;
+            animation: spin 2s linear infinite; margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-panel); padding: 14px 22px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .top-bar .icon { color: var(--accent); font-size: 18px; cursor: pointer; opacity: 0.85; }
+        .top-bar h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main); letter-spacing: 0.5px; }
+
+        .app-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+
+        /* ── screens ── */
+        #mainMenuScreen  { display: block; }
+        #trackingScreen  { display: none; }
+        #calibScreen     { display: none; }
+        #analysisScreen  { display: none; }
+        #challengeScreen { display: none; }
+
+        /* ── main menu ── */
+        .hero { text-align: center; margin: 36px 0 28px; }
+        .hero h1 { margin: 0; font-size: 28px; font-weight: 700; color: var(--text-main); }
+        .hero p { color: var(--text-secondary); margin: 4px 0 0 0; font-size: 12px; letter-spacing: 2px; }
+        .section-label { color: var(--text-secondary); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 10px; text-transform: uppercase; }
+        .upload-btn-large {
+            display: block; width: 100%; background: var(--bg-card);
+            border: 1px solid var(--accent); color: var(--accent);
+            padding: 18px; border-radius: var(--radius); font-size: 16px; font-weight: 600;
+            cursor: pointer; text-align: center; margin-bottom: 32px; transition: 0.2s;
+            box-sizing: border-box; letter-spacing: 0.3px;
+        }
+        .upload-btn-large:hover { background: var(--accent-dim); }
+        .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+        .tool-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 18px 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .tool-card:hover { border-color: var(--accent); background: var(--bg-card); }
+        .tool-card h4 { color: var(--text-main); margin: 8px 0 4px 0; font-size: 13px; font-weight: 600; }
+        .tool-card p { color: var(--text-secondary); margin: 0; font-size: 11px; }
+        .run-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 13px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .run-card h4 { margin: 0 0 3px 0; font-size: 14px; color: var(--text-main); }
+        .run-card p { margin: 0; color: var(--text-secondary); font-size: 12px; }
+        .btn-small { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 5px; font-size: 11px; cursor: pointer; transition: 0.15s; }
+        .btn-small:hover { background: var(--accent); color: var(--bg-main); }
+
+        /* ── tracking screen (unchanged layout) ── */
+        .dashboard-grid { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; margin-bottom: 20px; }
+        /* Update these specific classes */
+        .video-panel { flex: 1.2; min-width: 320px; background: var(--bg-panel); padding: 18px; border-radius: var(--radius); border: 1px solid var(--border-color); box-sizing: border-box; }
+        .graphs-panel { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; }
+
+        .graph-card { background: var(--bg-panel); padding: 14px; border-radius: var(--radius); border: 1px solid var(--border-color); }
+        .graph-title { font-size: 11px; font-weight: 700; color: var(--accent-soft); margin: 0 0 10px 0; letter-spacing: 1.2px; border-bottom: 1px solid var(--border-color); padding-bottom: 7px; text-transform: uppercase; }
+        .graph-box { height: 200px; width: 100%; }
+        #videoWrapper { position: relative; margin: 0 auto; border: 1px solid var(--border-color); background: #000; overflow: hidden; border-radius: 8px; display: block; margin-bottom: 14px; }
+        video { display: none; }
+        
+        /* 1. Change absolute to relative so the wrapper doesn't collapse */
+        canvas#canvasOutput { position: relative; display: block; width: 100%; height: auto; cursor: crosshair; }
+        
+        /* 2. Update the media query to be less aggressive */
+        @media (max-width: 768px) {
+            .video-panel, .graphs-panel { min-width: 100% !important; }
+            #videoWrapper { width: 100% !important; height: auto !important; }
+            .tools-grid { grid-template-columns: 1fr 1fr; }
+        }
+        canvas { touch-action: none; }
+
+        input[type=number] { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 5px 7px; border-radius: 5px; font-size: 13px; }
+        .action-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 13px; border-radius: var(--radius); cursor: pointer; font-size: 14px; font-weight: 600; width: 100%; text-transform: uppercase; transition: 0.2s; letter-spacing: 0.5px; }
+        .action-btn:hover:not(:disabled) { background: var(--accent-dim); }
+        .action-btn:disabled { border-color: var(--border-color); color: var(--text-secondary); cursor: not-allowed; }
+        .stop-btn { background: var(--danger); color: white; border: none; padding: 13px; border-radius: var(--radius); cursor: pointer; font-size: 14px; font-weight: 600; width: 100%; text-transform: uppercase; }
+        .highlight-box { background: var(--bg-card); padding: 13px; border-radius: 7px; border: 1px solid var(--border-color); margin-bottom: 14px; }
+        .slider-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        input[type=range] { flex-grow: 1; accent-color: var(--accent); }
+        #statusPanel { padding: 13px 16px; background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: 6px; font-weight: 600; margin-bottom: 18px; color: var(--text-secondary); font-size: 13px; }
+
+        /* ── live telemetry strip ── */
+        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 12px; }
+        .metric { background: var(--bg-card); padding: 8px 6px; border-radius: 7px; text-align: center; border: 1px solid var(--border-color); }
+        .metric span { display: block; font-size: 9px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
+        .metric strong { font-size: 15px; color: var(--success); }
+
+        /* ── calibration screen ── */
+        #calibVideoWrapper { position: relative; border: 1px solid var(--border-color); background: #000; overflow: hidden; border-radius: 8px; margin-bottom: 12px; }
+        #calibVideo { display: block; width: 100%; }
+        #calibCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+        .color-preview { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--border-color); display: inline-block; vertical-align: middle; margin-left: 8px; }
+
+        /* ── analysis screen ── */
+        select { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 7px 10px; border-radius: 6px; font-size: 13px; width: 100%; margin-bottom: 12px; }
+        .an-right-panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 14px; }
+        .tab-row { display: flex; gap: 6px; margin-bottom: 14px; }
+        .tab-btn { flex: 1; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 7px 4px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: 0.15s; text-align: center; }
+        .tab-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+        .an-tab { display: none; }
+        .an-tab.active { display: block; }
+        .stats-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .stats-table th { color: var(--text-secondary); font-weight: 600; text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border-color); font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .stats-table td { padding: 5px 8px; color: var(--text-main); border-bottom: 1px solid var(--border-color); }
+        .stats-table tr.highlight td { color: var(--accent); font-weight: 600; }
+        .stats-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        .stats-row:last-child { border-bottom: none; }
+        .stats-row .label { color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .stats-row .val { color: var(--text-main); font-weight: 600; }
+
+        /* ── challenge screen ── */
+        #challengeVideoWrapper { position: relative; border: 1px solid var(--border-color); background: #000; overflow: hidden; border-radius: 8px; margin-bottom: 12px; }
+        #challengeVideo { display: block; width: 100%; }
+        #challengeCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .delta-display { font-size: 22px; font-weight: 700; text-align: center; padding: 14px; border-radius: var(--radius); background: var(--bg-card); color: var(--text-secondary); margin-bottom: 12px; border: 1px solid var(--border-color); }
+        .dur-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+        .dur-btn { flex: 1; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 10px; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.15s; }
+        .dur-btn.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+        .countdown-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; font-size: 80px; font-weight: 700; color: var(--accent); border-radius: 8px; z-index: 10; pointer-events: none; }
+        .run-select-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--text-secondary); }
+        .run-select-row select { margin-bottom: 0; flex: 1; }
+
+        /* Add this to the bottom of the <style> section */
+        @media (max-width: 768px) {
+            .video-panel, .graphs-panel { min-width: 100% !important; }
+            #videoWrapper, #canvasOutput { width: 100% !important; height: auto !important; aspect-ratio: auto; }
+            .tools-grid { grid-template-columns: 1fr 1fr; }
+        }
+        canvas { touch-action: none; } /* Prevents scrolling while drawing */
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay">
+        <img src="favicon.png" alt="Loading...">
+        <div style="color:var(--accent); font-weight:bold; letter-spacing:1px; font-size:13px;">INITIALIZING CV ENGINE...</div>
+    </div>
+
+    <div class="top-bar">
+        <span class="icon" id="backBtn" onclick="showMenu()">&#8592;</span>
+        <h2 id="pageTitle">DeriveOn</h2>
+        <div style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:20px; border:1px solid var(--border-color);">
+            <label for="lowEndMode" style="font-size:10px; color:var(--text-secondary); font-weight:bold; cursor:pointer;">LOW-END</label>
+            <input type="checkbox" id="lowEndMode" style="width:14px; height:14px; accent-color:var(--success); cursor:pointer;" onchange="toggleGraphVisibility()">
+        </div>
+        <span id="cvStatus" style="font-size:12px; color:var(--danger);">CV Loading...</span>
+    </div>
+
+    <div id="mainMenuScreen" class="app-container">
+        <div class="hero">
+            <img src="icon.png" alt="DeriveOn Icon" style="width:120px; height:120px; margin-bottom:15px; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+            <h1>DeriveOn</h1>
+            <p>RC CAR KINEMATICS LAB</p>
+        </div>
+
+        <div class="section-label">NEW RUN</div>
+        <button id="menuUploadBtn" class="upload-btn-large" disabled>&#128190; Upload Video &amp; Track</button>
+        <input type="file" id="videoUpload" accept="video/*" style="display:none;" disabled>
+
+        <div class="section-label">TOOLS</div>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="showScreen('analysisScreen','Data Explorer')">
+                <div style="font-size:24px;">&#128200;</div><h4>Analysis</h4><p>Review saved runs</p>
+            </div>
+            <div class="tool-card" onclick="showScreen('calibScreen','Calibration')">
+                <div style="font-size:24px;">&#9881;</div><h4>Calibration</h4><p>Tune color &amp; space</p>
+            </div>
+            <div class="tool-card" onclick="showScreen('challengeScreen','Ghost Challenge')">
+                <div style="font-size:24px;">&#127942;</div><h4>Challenge</h4><p>Race the ghost</p>
+            </div>
+        </div>
+
+        <div class="section-label">SAVED RUNS</div>
+        <div id="runListContainer"></div>
+    </div>
+
+    <div id="trackingScreen" class="app-container">
+        <div id="statusPanel">STATUS: <span id="sysStatus" style="color: var(--danger);">Loading Computer Vision Engine (~5s)...</span></div>
+
+        <div class="highlight-box" id="step2" style="opacity: 0.5;">
+            <label style="color:var(--accent); font-weight:bold; font-size:14px; text-transform:uppercase;">Calibration</label>
+            <p style="font-size: 13px; margin: 8px 0; color:var(--text-secondary);">Enter car real width. Draw a tight box around the car on the video to lock scale.</p>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span style="font-size:13px;">Car width:</span>
+                <input type="number" id="objectRealSize" value="5.0" step="0.1" style="width:70px;"> cm
+                <span id="calibResult" style="color: var(--success); font-weight: bold; font-size: 13px;"></span>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="video-panel">
+                <div class="graph-title">LIVE CAMERA / VIDEO FEED</div>
+                <div class="metrics-grid">
+                    <div class="metric"><span>Speed</span><strong id="liveSpeed">0.0</strong> <span style="font-size:10px;color:var(--text-secondary)">cm/s</span></div>
+                    <div class="metric"><span>Accel</span><strong id="liveAcc">0.0</strong> <span style="font-size:10px;color:var(--text-secondary)">cm/s²</span></div>
+                    <div class="metric"><span>Dist</span><strong id="liveDist">0.0</strong> <span style="font-size:10px;color:var(--text-secondary)">cm</span></div>
+                    <div class="metric"><span>Time</span><strong id="liveTime">0.000</strong> <span style="font-size:10px;color:var(--text-secondary)">s</span></div>
+                    <div class="metric"><span>Top Spd</span><strong id="topSpeed">0.0</strong></div>
+                    <div class="metric"><span>Laps</span><strong id="liveLaps">0</strong></div>
+                </div>
+                <div id="videoWrapper">
+                    <video id="video" playsinline muted></video>
+                    <canvas id="canvasOutput"></canvas>
+                </div>
+                <button id="startBtn" class="action-btn" disabled>Play &amp; Track</button>
+            </div>
+
+            <div class="graphs-panel">
+                <div class="graph-card">
+                    <h3 class="graph-title">DISTANCE VS TIME</h3>
+                    <div class="graph-box"><canvas id="distChart"></canvas></div>
+                </div>
+                <div class="graph-card">
+                    <h3 class="graph-title">VELOCITY VS TIME</h3>
+                    <div class="graph-box"><canvas id="speedChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="calibScreen" class="app-container">
+        <div style="padding:12px; background:var(--bg-card); border-left:4px solid var(--accent); border-radius:6px; margin-bottom:20px; font-size:13px;">
+            <strong>CALIBRATION:</strong> Set color range by clicking the car, and/or map 4 track corners for perspective correction.
+        </div>
+        <div class="dashboard-grid">
+            <div class="video-panel">
+                <div class="graph-title">REFERENCE FEED &mdash; click to sample</div>
+                <div id="calibVideoWrapper">
+                    <video id="calibVideo" playsinline muted loop></video>
+                    <canvas id="calibCanvas"></canvas>
+                </div>
+                <button class="action-btn" style="margin-bottom:8px;" onclick="document.getElementById('calibVideoUpload').click()">Load Reference Video</button>
+                <input type="file" id="calibVideoUpload" accept="video/*" style="display:none;">
+            </div>
+            <div class="graphs-panel">
+                <div class="graph-card">
+                    <h3 class="graph-title">1. Color Isolation</h3>
+                    <p style="font-size:13px; color:var(--text-secondary); margin:0 0 10px 0;">Click the car in the video to sample its color.</p>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <span style="font-size:13px;">Sampled hue:</span>
+                        <div id="colorPreview" class="color-preview" style="background:blue;"></div>
+                        <span id="colorHueLabel" style="font-size:12px; color:var(--text-secondary);"></span>
+                    </div>
+                    <button class="btn-small" onclick="startColorPick()">Pick Color</button>
+                    <span id="colorPickStatus" style="font-size:12px; color:var(--accent); margin-left:10px;"></span>
+                </div>
+                <div class="graph-card">
+                    <h3 class="graph-title">2. Perspective Map (optional)</h3>
+                    <p style="font-size:13px; color:var(--text-secondary); margin:0 0 10px 0;">Click 4 corners of the track area (TL&rarr;TR&rarr;BR&rarr;BL) then enter real dimensions.</p>
+                    <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+                        <div><label style="font-size:12px;">Width (cm)</label><br><input type="number" id="trackW" value="200" style="width:70px;"></div>
+                        <div><label style="font-size:12px;">Height (cm)</label><br><input type="number" id="trackH" value="150" style="width:70px;"></div>
+                    </div>
+                    <button class="btn-small" onclick="startCornerPick()">Pick 4 Corners</button>
+                    <p id="perspStatus" style="color:var(--success); font-size:12px; margin:8px 0 0 0; font-weight:bold;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="analysisScreen" class="app-container">
+        <div style="padding:11px 16px; background:var(--bg-card); border-left:3px solid var(--accent); border-radius:6px; margin-bottom:18px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+            <span><strong style="color:var(--accent);">DATA EXPLORER</strong> — review saved run telemetry</span>
+            <button class="btn-small" onclick="exportCSV()">Export CSV</button>
+        </div>
+
+        <div style="display:flex; gap:14px; margin-bottom:14px; align-items:center; flex-wrap:wrap;">
+            <label style="font-size:12px; color:var(--text-secondary);">Run:</label>
+            <select id="anRunSelect" style="width:auto; flex:1; min-width:160px; margin-bottom:0;"></select>
+        </div>
+
+        <div class="dashboard-grid">
+            <div style="flex:1.1; min-width:300px;">
+                <div class="graph-card">
+                    <div class="graph-title">DISTANCE vs TIME</div>
+                    <div style="height:260px;"><canvas id="anStChart"></canvas></div>
+                    
+                    <div class="slider-container" style="margin-top:12px; margin-bottom:0;">
+                        <label style="font-size:11px; color:var(--text-secondary); width:18px;">T</label>
+                        <input type="range" id="anTSlider" min="0" max="0" value="0">
+                        <span id="anTDisp" style="font-size:12px; color:var(--accent); min-width:46px; text-align:right;">0.00s</span>
+                    </div>
+                    <div class="slider-container" style="margin-top:8px; margin-bottom:0;">
+                        <label style="font-size:11px; color:var(--text-secondary); width:18px;">t₀</label>
+                        <input type="range" id="anDeltaTSlider" min="0" max="0" value="0">
+                        <span id="anDeltaTDisp" style="font-size:12px; color:var(--accent); min-width:46px; text-align:right;">0.00s</span>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:14px; align-items:center;">
+                        <button id="anPlayBtn" class="btn-small" style="font-size:12px; padding:6px 14px;">▶ Play</button>
+                        <select id="anSpeedSelect" style="width:auto; padding:4px 8px; margin:0; font-size:12px;">
+                            <option value="0.5">0.5x Speed</option>
+                            <option value="1" selected>1.0x Speed</option>
+                            <option value="2">2.0x Speed</option>
+                            <option value="4">4.0x Speed</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <div style="flex:1; min-width:280px;">
+                <div class="an-right-panel">
+                    <div class="tab-row">
+                        <button class="tab-btn active" onclick="switchAnTab('vt')">v vs t</button>
+                        <button class="tab-btn" onclick="switchAnTab('table')">Table</button>
+                        <button class="tab-btn" onclick="switchAnTab('stats')">Race Stats</button>
+                    </div>
+
+                    <div id="anTab_vt" class="an-tab active">
+                        <div style="height:240px;"><canvas id="anVtChart"></canvas></div>
+                        <div style="margin-top:8px; font-size:11px; color:var(--text-secondary);">
+                            Inst. velocity at T: <span id="anVtInstVal" style="color:var(--accent); font-weight:600;">—</span> cm/s
+                        </div>
+                    </div>
+
+                    <div id="anTab_table" class="an-tab">
+                        <table class="stats-table">
+                            <thead><tr><th>t (s)</th><th>s (cm)</th><th>avg v (cm/s)</th><th>inst v (cm/s)</th></tr></thead>
+                            <tbody id="anTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="anTab_stats" class="an-tab">
+                        <div id="anStatsPanel">
+                            <p style="color:var(--text-secondary); font-size:12px; text-align:center; margin:20px 0;">No stats saved for this run.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="challengeScreen" class="app-container">
+        <div style="padding:11px 16px; background:var(--bg-card); border-left:3px solid var(--accent); border-radius:6px; margin-bottom:18px; font-size:12px;">
+            <strong style="color:var(--accent);">GHOST CHALLENGE</strong> — select 2 reference runs, pick duration, then race the synthesized ghost curve.
+        </div>
+        <div class="dashboard-grid">
+            <div style="flex:1.2; min-width:300px;">
+                <div id="chSetupPanel" class="graph-card" style="margin-bottom:14px;">
+                    <div class="graph-title">SETUP</div>
+                    <div class="run-select-row">
+                        <span style="min-width:60px;">Run A:</span>
+                        <select id="chRunA" style="margin-bottom:0; flex:1;"></select>
+                    </div>
+                    <div class="run-select-row" style="margin-bottom:14px;">
+                        <span style="min-width:60px;">Run B:</span>
+                        <select id="chRunB" style="margin-bottom:0; flex:1;"></select>
+                    </div>
+
+                    <div class="graph-title" style="margin-bottom:8px;">DURATION</div>
+                    <div class="dur-btns">
+                        <button class="dur-btn selected" onclick="selectDur(15,this)">15s</button>
+                        <button class="dur-btn" onclick="selectDur(30,this)">30s</button>
+                        <button class="dur-btn" onclick="selectDur(45,this)">45s</button>
+                    </div>
+
+                    <div class="graph-title" style="margin-bottom:8px;">RACE CAMERA</div>
+                    <button id="challengeCamBtn" class="action-btn" style="margin-bottom:8px; font-size:12px; padding:10px;">Enable Camera</button>
+                    <button id="startChallengeBtn" class="action-btn" style="font-size:13px; padding:10px;" disabled onclick="startChallenge()">Set Bounding Box &amp; Race</button>
+                </div>
+
+                <div id="chVideoPanel" class="graph-card">
+                    <div class="graph-title">RACE CAMERA</div>
+                    <div id="challengeVideoWrapper" style="position:relative;">
+                        <video id="challengeVideo" playsinline muted></video>
+                        <canvas id="challengeCanvas"></canvas>
+                        <div id="chCountdown" class="countdown-overlay" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:14px;">
+                <div id="deltaDisplay" class="delta-display">Awaiting start...</div>
+                <div class="metrics-grid">
+                    <div class="metric"><span>Ghost dist</span><strong id="chGhostDist">0.0</strong></div>
+                    <div class="metric"><span>Your dist</span><strong id="chYourDist">0.0</strong></div>
+                    <div class="metric"><span>Grade</span><strong id="chGrade">--</strong></div>
+                </div>
+                <div class="graph-card">
+                    <div class="graph-title">HEAD-TO-HEAD</div>
+                    <div class="graph-box"><canvas id="chChart"></canvas></div>
+                </div>
+                <div id="chResultPanel" class="graph-card" style="display:none;">
+                    <div class="graph-title">RACE RESULT</div>
+                    <div id="chResultBody"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="saveModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
+        <div class="graph-card" style="width: 400px; max-width:90%; background:var(--bg-panel);">
+            <div class="graph-title">RACE FINISHED &mdash; STATS</div>
+            <div id="modalStatsBody" style="margin-bottom: 20px;"></div>
+            <div style="display:flex; gap:10px;">
+                <button class="action-btn" id="btnSaveRun">Save Run</button>
+                <button class="action-btn" id="btnDiscardRun" style="background:transparent; border-color:var(--border-color); color:var(--text-secondary);">Discard</button>
+            </div>
+        </div>
+    </div>
+
+    <script async src="https://docs.opencv.org/4.5.0/opencv.js" onload="onOpenCvReady();" onerror="onOpenCvError();" type="text/javascript"></script>
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration, vol=0.1) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.value = freq;
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+        function playClick() { playTone(600, 'sine', 0.05, 0.1); }
+        // Enthusiastic racing start sequence
+        function playStart() { 
+            playTone(523, 'sine', 0.1, 0.1); 
+            setTimeout(() => playTone(659, 'sine', 0.1, 0.1), 100); 
+            setTimeout(() => playTone(784, 'sine', 0.1, 0.1), 200); 
+            setTimeout(() => playTone(1046, 'sine', 0.3, 0.15), 300);
+        }
+        function playStop()  { playTone(400, 'square', 0.2, 0.05); }
+        function playBeep()  { playTone(800, 'sine', 0.1, 0.15); }
+        function playGo()    { playTone(1200, 'sine', 0.3, 0.15); }
+
+        document.addEventListener('click', e => {
+            if (e.target.closest('button') || e.target.closest('.tool-card') || e.target.closest('.icon')) {
+                playClick();
+            }
+        });
+
+        const video      = document.getElementById('video');
+        const canvas     = document.getElementById('canvasOutput');
+        const ctx        = canvas.getContext('2d', { willReadFrequently: true });
+        const startBtn   = document.getElementById('startBtn');
+        const fileInput  = document.getElementById('videoUpload');
+        const sysStatus  = document.getElementById('sysStatus');
+        const wrapper    = document.getElementById('videoWrapper');
+
+        let streaming = false; let scale = null; let targetLocked = false;
+        let lastCx = null, lastCy = null; let lastTime = 0; let cumulativeDistance = 0;
+        let isDrawing = false; let startX = 0, startY = 0; let box = { x:0, y:0, w:0, h:0 };
+        let lastSpeed = 0; 
+        let laps = 0, lapLock = false, trackStartX = null, trackStartY = null; 
+
+        let timeData = [], distanceData = [], speedData = [];
+        let savedRuns = JSON.parse(localStorage.getItem('deriveon_runs') || '[]');
+        let pendingRun = null;
+
+        let hsvLow  = [90, 50, 20, 0];
+        let hsvHigh = [140, 255, 255, 0];
+        let perspMatrix = null;
+
+        const distCtx     = document.getElementById('distChart').getContext('2d');
+        const speedCtx    = document.getElementById('speedChart').getContext('2d');
+
+        const chartConfig = (label, dataArray, color) => ({
+            type: 'line',
+            data: { labels: timeData, datasets: [{ label, data: dataArray, borderColor: color, tension: 0.4, borderWidth: 1.5, pointRadius: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, animation: false,
+                scales: { x: { grid:{color:'#2a241c'}, ticks:{color:'#6a6460', maxTicksLimit:6} }, y: { grid:{color:'#2a241c'}, ticks:{color:'#6a6460', maxTicksLimit:5} } },
+                plugins: { legend: { display: false } } }
+        });
+        let distChart  = new Chart(distCtx,  chartConfig('Distance (cm)', distanceData, '#c9914a'));
+        let speedChart = new Chart(speedCtx, chartConfig('Speed (cm/s)',   speedData,   '#c9914a'));
+
+        const vertLinePlugin = {
+            id: 'vertLine',
+            beforeDraw: (chart) => {
+                if (chart.canvas.id !== 'anStChart' && chart.canvas.id !== 'anVtChart') return;
+                const idx = parseInt(document.getElementById('anTSlider').value);
+                if (isNaN(idx)) return;
+                const meta = chart.getDatasetMeta(0);
+                if (!meta.data || !meta.data[idx]) return;
+                const x = meta.data[idx].x;
+                const cctx = chart.ctx;
+                cctx.save();
+                cctx.beginPath();
+                cctx.moveTo(x, chart.chartArea.top);
+                cctx.lineTo(x, chart.chartArea.bottom);
+                cctx.lineWidth = 1;
+                cctx.strokeStyle = '#6a6460';
+                cctx.stroke();
+                cctx.restore();
+            }
+        };
+        Chart.register(vertLinePlugin);
+
+        function onOpenCvError() {
+            sysStatus.innerText = "ERROR: Browser or network blocked OpenCV.";
+            sysStatus.style.color = "var(--danger)";
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        function onOpenCvReady() {
+            // Dismiss full screen loading smoothly
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 600);
+
+            sysStatus.innerText = "SYSTEM READY.";
+            sysStatus.style.color = "var(--success)";
+            document.getElementById('cvStatus').innerText = "CV: Online";
+            document.getElementById('cvStatus').style.color = "var(--success)";
+            fileInput.disabled = false;
+            document.getElementById('menuUploadBtn').disabled = false;
+            renderRunList();
+        }
+
+        const screens = ['mainMenuScreen','trackingScreen','calibScreen','analysisScreen','challengeScreen'];
+        function showScreen(id, title) {
+            screens.forEach(s => document.getElementById(s).style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+            document.getElementById('pageTitle').innerText = title || 'DeriveOn';
+            if (id === 'analysisScreen')  initAnalysisScreen();
+            if (id === 'challengeScreen') initChallengeScreen();
+        }
+        function showMenu() {
+            showScreen('mainMenuScreen', 'DeriveOn');
+            renderRunList();
+        }
+        function showTracking() {
+            showScreen('trackingScreen', 'Tracking');
+        }
+
+        document.getElementById('menuUploadBtn').addEventListener('click', () => fileInput.click());
+
+        function renderRunList() {
+            const c = document.getElementById('runListContainer');
+            if (!savedRuns.length) { c.innerHTML = '<p style="color:var(--text-secondary); text-align:center; font-size:13px;">No runs saved yet.</p>'; return; }
+            c.innerHTML = '';
+            savedRuns.slice().reverse().forEach((r, i) => {
+                const realIdx = savedRuns.length - 1 - i;
+                const div = document.createElement('div');
+                div.className = 'run-card';
+                div.innerHTML = `<div><h4 style="margin:0 0 4px 0;">Run ${realIdx+1}</h4><p>${r.date} &bull; ${r.time.toFixed(2)}s &bull; ${r.dist.toFixed(1)} cm &bull; top ${r.topSpeed.toFixed(1)} cm/s</p></div>
+                    <button class="btn-small" onclick="openRunInAnalysis(${realIdx})">Analyze</button>`;
+                c.appendChild(div);
+            });
+        }
+        function openRunInAnalysis(idx) {
+            showScreen('analysisScreen', 'Data Explorer');
+            document.getElementById('anRunSelect').value = idx;
+            loadAnalysisRun(idx);
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                video.src = URL.createObjectURL(e.target.files[0]);
+                video.load();
+                showTracking();
+            }
+        });
+
+        video.addEventListener('loadeddata', () => {
+            const maxWidth = document.querySelector('.video-panel').clientWidth - 40;
+            const ratio = video.videoWidth / video.videoHeight;
+            let targetWidth  = Math.min(maxWidth, video.videoWidth);
+            let targetHeight = targetWidth / ratio;
+            video.width = targetWidth; video.height = targetHeight;
+            canvas.width = targetWidth; canvas.height = targetHeight;
+            wrapper.style.width  = targetWidth  + 'px';
+            wrapper.style.height = targetHeight + 'px';
+            document.getElementById('step2').style.opacity = "1";
+            video.currentTime = 0.5;
+        });
+
+        video.addEventListener('seeked', () => {
+            if (!streaming) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                sysStatus.innerText = "Video loaded. Draw a box around the car.";
+                sysStatus.style.color = "var(--text-main)";
+            }
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (streaming) return;
+            const rect = canvas.getBoundingClientRect();
+            startX = e.clientX - rect.left; startY = e.clientY - rect.top;
+            isDrawing = true; targetLocked = false; startBtn.disabled = true;
+        });
+
+        /* ISNERT LISTENER FOR MOBILE */
+        // Helper to normalize touch/mouse coordinates
+        const getEvPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        };
+
+        // Replace your existing mousedown/move/up listeners with these combined versions:
+        const startDraw = (e) => {
+            if (streaming) return;
+            if (e.touches) e.preventDefault();
+            const pos = getEvPos(e);
+            startX = pos.x; startY = pos.y;
+            isDrawing = true; targetLocked = false; startBtn.disabled = true;
+        };
+
+        const moveDraw = (e) => {
+            if (!isDrawing || streaming) return;
+            const pos = getEvPos(e);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#e3aa55'; ctx.lineWidth = 2;
+            ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
+        };
+
+        const endDraw = (e) => {
+            if (!isDrawing || streaming) return;
+            isDrawing = false;
+            // For mouseup, e.clientX is available. For touchend, use changedTouches.
+            const endEv = e.changedTouches ? e.changedTouches[0] : e;
+            const rect = canvas.getBoundingClientRect();
+            const ex = (endEv.clientX - rect.left) * (canvas.width / rect.width);
+            const ey = (endEv.clientY - rect.top) * (canvas.height / rect.height);
+            
+            box.x = Math.min(startX, ex); box.y = Math.min(startY, ey);
+            box.w = Math.abs(startX - ex); box.h = Math.abs(startY - ey);
+            
+            if (box.w > 10 && box.h > 10) {
+                let realCm = parseFloat(document.getElementById('objectRealSize').value);
+                scale = realCm / box.w;
+                lastCx = box.x + box.w/2; lastCy = box.y + box.h/2;
+                targetLocked = true; startBtn.disabled = false;
+                document.getElementById('calibResult').innerText = `Locked!`;
+                sysStatus.innerText = "Tracker armed.";
+            }
+        };
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', moveDraw);
+        canvas.addEventListener('mouseup', endDraw);
+        canvas.addEventListener('touchstart', startDraw, {passive: false});
+        canvas.addEventListener('touchmove', moveDraw, {passive: false});
+        canvas.addEventListener('touchend', endDraw);
+        /* END LISTENER FOR MOBILE */
+
+        startBtn.addEventListener('click', () => {
+            if (!streaming) {
+                if (!targetLocked) return alert("Draw a box around the car first!");
+                timeData.length = 0; distanceData.length = 0; speedData.length = 0;
+                distChart.update(); speedChart.update();
+                cumulativeDistance = 0; lastTime = 0; lastSpeed = 0;
+                laps = 0; lapLock = false; trackStartX = null; trackStartY = null;
+                document.getElementById('liveSpeed').innerText = '0.0';
+                document.getElementById('liveAcc').innerText   = '0.0';
+                document.getElementById('liveDist').innerText  = '0.0';
+                document.getElementById('liveTime').innerText  = '0.000';
+                document.getElementById('topSpeed').innerText  = '0.0';
+                document.getElementById('liveLaps').innerText  = '0';
+
+                video.currentTime = 0;
+                setTimeout(() => {
+                    playStart();
+                    video.play(); streaming = true;
+                    startBtn.innerText = "Stop"; startBtn.className = "stop-btn";
+                    sysStatus.innerText = "Tracking in progress...";
+                    processVideo();
+                }, 200);
+            } else {
+                stopTracking();
+            }
+        });
+
+        video.addEventListener('ended', stopTracking);
+
+        function stopTracking() {
+            playStop();
+            video.pause(); streaming = false;
+            startBtn.innerText = "Play & Track"; startBtn.className = "action-btn";
+            sysStatus.innerText = "Tracking complete.";
+
+            if (timeData.length > 5) {
+                const totalTime = parseFloat(timeData[timeData.length-1]);
+                const totalDist = distanceData[distanceData.length-1];
+                const topSpd    = Math.max(...speedData);
+                const avgSpd    = totalDist / totalTime;
+                let t50 = null;
+                for (let i = 0; i < distanceData.length; i++) { if (distanceData[i] >= 50) { t50 = parseFloat(timeData[i]); break; } }
+                let topSpdTime = null;
+                const topSpdIdx = speedData.indexOf(topSpd);
+                if (topSpdIdx >= 0) topSpdTime = parseFloat(timeData[topSpdIdx]);
+                const accels = [];
+                for (let i = 1; i < speedData.length; i++) {
+                    const dt = parseFloat(timeData[i]) - parseFloat(timeData[i-1]);
+                    if (dt > 0) accels.push((speedData[i] - speedData[i-1]) / dt);
+                }
+                const accelMean = accels.reduce((a,b)=>a+b,0) / (accels.length||1);
+                const accelStd  = Math.sqrt(accels.reduce((a,b)=>a+(b-accelMean)**2,0) / (accels.length||1));
+
+                const racingStats = { totalTime, totalDist, topSpd, avgSpd, t50, topSpdTime, accelStd, laps };
+                pendingRun = {
+                    date:     new Date().toLocaleString(),
+                    time:     totalTime,
+                    dist:     totalDist,
+                    topSpeed: topSpd,
+                    timeData:     timeData.slice(),
+                    distanceData: distanceData.slice(),
+                    speedData:    speedData.slice(),
+                    racingStats
+                };
+
+                const s = racingStats;
+                const rows = [
+                    ['Total time',       s.totalTime.toFixed(3) + ' s'],
+                    ['Total distance',   s.totalDist.toFixed(1) + ' cm'],
+                    ['Top speed',        s.topSpd.toFixed(1) + ' cm/s'],
+                    ['Avg speed',        s.avgSpd.toFixed(1) + ' cm/s'],
+                    ['Time to 50 cm',    s.t50 !== null ? s.t50.toFixed(3) + ' s' : '—'],
+                    ['Top speed at',     s.topSpdTime !== null ? s.topSpdTime.toFixed(3) + ' s' : '—'],
+                    ['Smoothness (σa)',  s.accelStd.toFixed(1) + ' cm/s²'],
+                    ['Laps detected',    s.laps],
+                ];
+                document.getElementById('modalStatsBody').innerHTML = rows.map(([l,v]) => `<div class="stats-row"><span class="label">${l}</span><span class="val">${v}</span></div>`).join('');
+                document.getElementById('saveModal').style.display = 'flex';
+            }
+        }
+
+        document.getElementById('btnSaveRun').addEventListener('click', () => {
+            if (pendingRun) {
+                savedRuns.push(pendingRun);
+                localStorage.setItem('deriveon_runs', JSON.stringify(savedRuns));
+                pendingRun = null;
+            }
+            document.getElementById('saveModal').style.display = 'none';
+        });
+
+        document.getElementById('btnDiscardRun').addEventListener('click', () => {
+            pendingRun = null;
+            document.getElementById('saveModal').style.display = 'none';
+        });
+
+        function processVideo() {
+            if (!streaming) return;
+            let src  = new cv.Mat(canvas.height, canvas.width, cv.CV_8UC4);
+            let hsv  = new cv.Mat(canvas.height, canvas.width, cv.CV_8UC3);
+            let mask = new cv.Mat(canvas.height, canvas.width, cv.CV_8UC1);
+            let cap  = new cv.VideoCapture(video);
+            
+            // PRE-ALLOCATE THESE ONCE HERE
+            let lb = new cv.Mat(hsv.rows, hsv.cols, hsv.type(), hsvLow);
+            let hb = new cv.Mat(hsv.rows, hsv.cols, hsv.type(), hsvHigh);
+
+            let frameCount = 0; // Declare this outside processFrame for lowEnd
+
+            function processFrame() {
+                // FIXED: Cleanup happens here when tracking stops
+                if (!streaming) { 
+                    src.delete(); hsv.delete(); mask.delete(); 
+                    lb.delete(); hb.delete(); 
+                    return; 
+                }
+
+                frameCount++;
+                
+                // Safety check in case the element doesn't exist yet
+                const lowEndToggle = document.getElementById('lowEndMode');
+                const isLowEnd = lowEndToggle ? lowEndToggle.checked : false;
+
+                // Skip every other frame on low-end mode to save CPU
+                if (isLowEnd && frameCount % 2 !== 0) {
+                    requestAnimationFrame(processFrame);
+                    return;
+                }
+
+                let currentTime = video.currentTime;
+                cap.read(src);
+                cv.cvtColor(src, hsv, cv.COLOR_RGBA2RGB);
+                cv.cvtColor(hsv, hsv, cv.COLOR_RGB2HSV);
+
+                // Uses the safely pre-allocated matrices
+                cv.inRange(hsv, lb, hb, mask);
+
+                let contours = new cv.MatVector(); 
+                let hierarchy = new cv.Mat();
+                cv.findContours(mask, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+                let bestIdx = -1, minDist = Infinity;
+                for (let i = 0; i < contours.size(); ++i) {
+                    if (cv.contourArea(contours.get(i)) > 10) {
+                        let m = cv.moments(contours.get(i), false);
+                        let cx = m.m10/m.m00, cy = m.m01/m.m00;
+                        let d = Math.hypot(cx - lastCx, cy - lastCy);
+                        if (d < 300 && d < minDist) { minDist = d; bestIdx = i; }
+                    }
+                }
+
+                if (bestIdx !== -1) {
+                    let m  = cv.moments(contours.get(bestIdx), false);
+                    let cx = m.m10/m.m00, cy = m.m01/m.m00;
+
+                    let realX, realY;
+                    if (perspMatrix) {
+                        let ptMat  = cv.matFromArray(1, 1, cv.CV_32FC2, [cx, cy]);
+                        let dstMat = new cv.Mat();
+                        cv.perspectiveTransform(ptMat, dstMat, perspMatrix);
+                        realX = dstMat.data32F[0]; realY = dstMat.data32F[1];
+                        ptMat.delete(); dstMat.delete();
+                    } else {
+                        realX = cx * scale; realY = cy * scale;
+                    }
+
+                    // ── 1. POSITION SMOOTHING (Prevents phantom distance) ──
+                    const posAlpha = 0.4; // 40% new frame, 60% momentum
+                    if (prevRealX !== undefined) {
+                        realX = posAlpha * realX + (1 - posAlpha) * prevRealX;
+                        realY = posAlpha * realY + (1 - posAlpha) * prevRealY;
+                    }
+
+                    cv.circle(src, new cv.Point(cx, cy), 8, [227,170,85,255], 2);
+                    cv.line(src, new cv.Point(cx-15,cy), new cv.Point(cx+15,cy), [227,170,85,255], 2);
+                    cv.line(src, new cv.Point(cx,cy-15), new cv.Point(cx,cy+15), [227,170,85,255], 2);
+
+                    if (currentTime > lastTime) {
+                        if (trackStartX === null) { trackStartX = realX; trackStartY = realY; }
+                        let cmStep = (prevRealX !== undefined) ? Math.hypot(realX - prevRealX, realY - prevRealY) : 0;
+
+                        cumulativeDistance += cmStep;
+                        let dt    = currentTime - lastTime;
+                        let rawSpeed = cmStep / dt;
+                        
+                        // ── 2. VELOCITY SMOOTHING (Prevents derivative spikes) ──
+                        const velAlpha = 0.15; // 15% new speed, 85% momentum
+                        let speed = (lastSpeed === 0) ? rawSpeed : (velAlpha * rawSpeed + (1 - velAlpha) * lastSpeed);
+                        let acc   = (speed - lastSpeed) / dt;
+
+                        let dStart = Math.hypot(realX - trackStartX, realY - trackStartY);
+                        if (cumulativeDistance > 50 && dStart < 15) {
+                            if (!lapLock) { laps++; lapLock = true; }
+                        } else if (dStart > 30) lapLock = false;
+
+                        timeData.push(currentTime.toFixed(3));
+                        distanceData.push(cumulativeDistance);
+                        speedData.push(speed);
+
+                        // SURGICAL EDIT: Only update charts if NOT in Performance Mode
+                        if (!isLowEnd) {
+                            distChart.update('none'); 
+                            speedChart.update('none');
+                        }
+
+                        document.getElementById('liveSpeed').innerText = speed.toFixed(1);
+                        document.getElementById('liveAcc').innerText   = acc.toFixed(1);
+                        document.getElementById('liveDist').innerText  = cumulativeDistance.toFixed(1);
+                        document.getElementById('liveTime').innerText  = currentTime.toFixed(3);
+                        document.getElementById('liveLaps').innerText  = laps;
+                        let topEl = document.getElementById('topSpeed');
+                        if (speed > parseFloat(topEl.innerText)) topEl.innerText = speed.toFixed(1);
+
+                        lastSpeed = speed;
+                    }
+                    lastCx = cx; lastCy = cy; lastTime = currentTime;
+                    prevRealX = realX; prevRealY = realY;
+                }
+
+                cv.imshow('canvasOutput', src);
+                contours.delete(); hierarchy.delete();
+                requestAnimationFrame(processFrame);
+            }
+            
+            processFrame();
+            // FIXED: Removed the synchronous delete calls from here
+        }
+
+        /* fix ends */ 
+
+        let prevRealX, prevRealY;
+
+        document.getElementById('calibVideoUpload').addEventListener('change', e => {
+            if (!e.target.files.length) return;
+            const cv_ = document.getElementById('calibVideo');
+            cv_.src = URL.createObjectURL(e.target.files[0]);
+            cv_.onloadeddata = () => {
+                const cvs = document.getElementById('calibCanvas');
+                cvs.width  = cv_.videoWidth;
+                cvs.height = cv_.videoHeight;
+                cv_.play();
+            };
+        });
+
+        let calibPickMode = null, cornerPts = [];
+        function startColorPick() {
+            calibPickMode = 'color';
+            document.getElementById('colorPickStatus').innerText = 'Click on the car...';
+        }
+        function startCornerPick() {
+            calibPickMode = 'corners';
+            cornerPts = [];
+            document.getElementById('perspStatus').innerText = 'Click TL corner...';
+        }
+
+        document.getElementById('calibCanvas').addEventListener('click', e => {
+            if (!calibPickMode) return;
+            const cvs = document.getElementById('calibCanvas');
+            const cv_ = document.getElementById('calibVideo');
+            const cctx = cvs.getContext('2d');
+            cctx.drawImage(cv_, 0, 0, cvs.width, cvs.height);
+            const rect = cvs.getBoundingClientRect();
+            const px = Math.round(e.offsetX * cvs.width  / rect.width);
+            const py = Math.round(e.offsetY * cvs.height / rect.height);
+
+            if (calibPickMode === 'color') {
+                const pxData = cctx.getImageData(px, py, 1, 1).data;
+                document.getElementById('colorPreview').style.background = `rgb(${pxData[0]},${pxData[1]},${pxData[2]})`;
+                let r = pxData[0]/255, g = pxData[1]/255, b = pxData[2]/255;
+                let max = Math.max(r,g,b), min = Math.min(r,g,b), d = max-min, h = 0;
+                if (max !== min) {
+                    if (max===r) h = (g-b)/d + (g<b?6:0);
+                    else if (max===g) h = (b-r)/d + 2;
+                    else h = (r-g)/d + 4;
+                    h /= 6;
+                }
+                let cvH = Math.round(h * 180);
+                hsvLow  = [Math.max(0, cvH-20), 80, 40, 0];
+                hsvHigh = [Math.min(180, cvH+20), 255, 255, 0];
+                document.getElementById('colorHueLabel').innerText = `HSV centre: ${cvH}`;
+                document.getElementById('colorPickStatus').innerText = 'Color locked!';
+                calibPickMode = null;
+
+            } else if (calibPickMode === 'corners') {
+                cornerPts.push({x: px, y: py});
+                cctx.fillStyle = '#5a9e6f'; cctx.beginPath(); cctx.arc(px, py, 6, 0, 2*Math.PI); cctx.fill();
+                const labels = ['TR corner...','BR corner...','BL corner...','Done'];
+                document.getElementById('perspStatus').innerText = cornerPts.length < 4 ? 'Click ' + labels[cornerPts.length-1] : '';
+                if (cornerPts.length === 4) {
+                    const W = parseFloat(document.getElementById('trackW').value);
+                    const H = parseFloat(document.getElementById('trackH').value);
+                    const src_ = cv.matFromArray(4,1,cv.CV_32FC2,[cornerPts[0].x,cornerPts[0].y, cornerPts[1].x,cornerPts[1].y, cornerPts[2].x,cornerPts[2].y, cornerPts[3].x,cornerPts[3].y]);
+                    const dst_ = cv.matFromArray(4,1,cv.CV_32FC2,[0,0, W,0, W,H, 0,H]);
+                    perspMatrix = cv.getPerspectiveTransform(src_, dst_);
+                    src_.delete(); dst_.delete();
+                    document.getElementById('perspStatus').innerText = `Perspective map active (${W}×${H} cm).`;
+                    calibPickMode = null;
+                }
+            }
+        });
+
+        const CH_OPTS = {
+            responsive:true, maintainAspectRatio:false, animation:false,
+            scales:{ x:{grid:{color:'#2a241c'},ticks:{color:'#6a6460',maxTicksLimit:7}}, y:{grid:{color:'#2a241c'},ticks:{color:'#6a6460',maxTicksLimit:6}} },
+            plugins:{ legend:{display:false} }
+        };
+
+        let anOpts = JSON.parse(JSON.stringify(CH_OPTS));
+        // Force a strict linear timescale to prevent categorical bending of tangents
+        anOpts.scales.x = { type: 'linear', grid: {color:'#2a241c'}, ticks: {color:'#6a6460', maxTicksLimit:7} };
+
+        let anStChart = new Chart(document.getElementById('anStChart').getContext('2d'), {
+            type:'line', data:{ datasets:[
+                { label:'s(t)', data:[], borderColor:'#c9914a', tension:0.3, pointRadius:0, borderWidth:1.5 },
+                { label:'Tangent', data:[], borderColor:'#5a9e6f', tension:0, pointRadius:0, borderWidth:1.5 },
+                { label:'Secant', data:[], borderColor:'#a65d1b', tension:0, pointRadius:0, pointBackgroundColor:'#a65d1b', borderWidth:1.5 }
+            ]}, options: anOpts
+        });
+
+        let anVtChart = new Chart(document.getElementById('anVtChart').getContext('2d'), {
+            type:'line', data:{ datasets:[
+                { label:'v(t)', data:[], borderColor:'#7a9ec0', tension:0.3, pointRadius:0, borderWidth:1.5 }
+            ]}, options: anOpts
+        });
+
+        let anRun = null;
+        let anTabActive = 'vt';
+
+        function switchAnTab(tab) {
+            anTabActive = tab;
+            document.querySelectorAll('.tab-btn').forEach((b,i) => {
+                const names = ['vt','table','stats'];
+                b.classList.toggle('active', names[i] === tab);
+            });
+            document.querySelectorAll('.an-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('anTab_' + tab).classList.add('active');
+            if (anRun) updateAnView();
+        }
+
+        function initAnalysisScreen() {
+            const sel = document.getElementById('anRunSelect');
+            sel.innerHTML = savedRuns.map((r,i) => `<option value="${i}">Run ${i+1} — ${r.date}</option>`).join('');
+            if (savedRuns.length) loadAnalysisRun(savedRuns.length - 1);
+            sel.onchange = () => loadAnalysisRun(parseInt(sel.value));
+        }
+
+        function loadAnalysisRun(idx) {
+            anRun = savedRuns[idx];
+            if (!anRun) return;
+            document.getElementById('anRunSelect').value = idx;
+
+            const n = anRun.timeData.length;
+            const tSlider = document.getElementById('anTSlider');
+            tSlider.max = n - 1; tSlider.value = 0;
+            document.getElementById('anTDisp').innerText = parseFloat(anRun.timeData[0]).toFixed(2) + 's';
+
+            const dSlider = document.getElementById('anDeltaTSlider');
+            dSlider.max = 0; dSlider.value = 0;
+            document.getElementById('anDeltaTDisp').innerText = '0.00s';
+
+            anStChart.options.scales.y.min = 0;
+            anStChart.options.scales.y.max = anRun.distanceData[n-1] * 1.1;
+            anVtChart.options.scales.y.min = 0;
+            anVtChart.options.scales.y.max = Math.max(...anRun.speedData) * 1.1;
+
+            updateAnView();
+        }
+
+        let anPlaybackTimer = null;
+        document.getElementById('anPlayBtn').addEventListener('click', () => {
+            if (anPlaybackTimer) {
+                clearInterval(anPlaybackTimer);
+                anPlaybackTimer = null;
+                document.getElementById('anPlayBtn').innerText = '▶ Play';
+            } else {
+                if (!anRun) return;
+                const slider = document.getElementById('anTSlider');
+                if (parseInt(slider.value) >= parseInt(slider.max)) slider.value = 0;
+                
+                document.getElementById('anPlayBtn').innerText = '⏸ Pause';
+                
+                let dt = 33; 
+                if (anRun.timeData.length > 1) {
+                    dt = (parseFloat(anRun.timeData[anRun.timeData.length-1]) * 1000) / anRun.timeData.length;
+                }
+                
+                anPlaybackTimer = setInterval(() => {
+                    let val = parseInt(slider.value);
+                    if (val >= parseInt(slider.max)) {
+                        clearInterval(anPlaybackTimer);
+                        anPlaybackTimer = null;
+                        document.getElementById('anPlayBtn').innerText = '▶ Play';
+                        return;
+                    }
+                    slider.value = val + 1;
+                    slider.dispatchEvent(new Event('input'));
+                }, dt / parseFloat(document.getElementById('anSpeedSelect').value)); 
+            }
+        });
+
+        document.getElementById('anTSlider').addEventListener('input', function() {
+            if (!anRun) return;
+            const i = parseInt(this.value);
+            document.getElementById('anTDisp').innerText = parseFloat(anRun.timeData[i]).toFixed(2) + 's';
+            const dSlider = document.getElementById('anDeltaTSlider');
+            dSlider.max = i;
+            if (parseInt(dSlider.value) > i) dSlider.value = i;
+            const dIdx = parseInt(dSlider.value);
+            document.getElementById('anDeltaTDisp').innerText = (parseFloat(anRun.timeData[i]) - parseFloat(anRun.timeData[i - dIdx])).toFixed(2) + 's';
+            updateAnView();
+        });
+
+        document.getElementById('anDeltaTSlider').addEventListener('input', function() {
+            if (!anRun) return;
+            const i = parseInt(document.getElementById('anTSlider').value);
+            const dIdx = parseInt(this.value);
+            document.getElementById('anDeltaTDisp').innerText = (parseFloat(anRun.timeData[i]) - parseFloat(anRun.timeData[i - dIdx])).toFixed(2) + 's';
+            updateAnView();
+        });
+
+        function updateAnView() {
+            if (!anRun) return;
+            const n    = anRun.timeData.length;
+            const idx  = parseInt(document.getElementById('anTSlider').value);
+            const dIdx = parseInt(document.getElementById('anDeltaTSlider').value);
+            const prevIdx = Math.max(0, idx - dIdx);
+
+            const T    = parseFloat(anRun.timeData[idx]);
+            const endT = parseFloat(anRun.timeData[n-1]);
+            const winEnd = Math.min(T + 5, endT);
+
+            let winEndIdx = n - 1;
+            for (let i = idx; i < n; i++) { if (parseFloat(anRun.timeData[i]) >= winEnd) { winEndIdx = i; break; } }
+
+            const subLabels = anRun.timeData.slice(0, winEndIdx + 1);
+            anStChart.data.labels = subLabels;
+            anVtChart.data.labels = subLabels;
+
+            anStChart.data.datasets[0].data = anRun.distanceData.slice(0, winEndIdx + 1);
+
+            const St = anRun.distanceData[idx];
+            const Tprev = parseFloat(anRun.timeData[prevIdx]);
+            const Sprev = anRun.distanceData[prevIdx];
+
+            let v_sec = 0;
+            if (T !== Tprev) v_sec = (St - Sprev) / (T - Tprev);
+            const v_tan = anRun.speedData[idx] || 0;
+
+            const tangentData = new Array(winEndIdx + 1).fill(null);
+            const secantData  = new Array(winEndIdx + 1).fill(null);
+            const secantRadii = new Array(winEndIdx + 1).fill(0);
+
+            for (let i = 0; i <= winEndIdx; i++) {
+                let ti = parseFloat(anRun.timeData[i]);
+                tangentData[i] = St + v_tan * (ti - T);
+                if (T !== Tprev) secantData[i] = St + v_sec * (ti - T);
+            }
+
+            if (T !== Tprev && prevIdx <= winEndIdx) {
+                secantRadii[prevIdx] = 5;
+            }
+
+            anStChart.data.datasets[1].data = tangentData;
+            anStChart.data.datasets[2].data = secantData;
+            anStChart.data.datasets[2].pointRadius = secantRadii;
+            anStChart.update('none');
+
+            const growV = new Array(winEndIdx + 1).fill(null);
+            for(let i = 0; i <= idx; i++) growV[i] = anRun.speedData[i];
+            anVtChart.data.datasets[0].data = growV;
+            anVtChart.update('none');
+
+            document.getElementById('anVtInstVal').innerText = (anRun.speedData[idx]||0).toFixed(2);
+
+            if (anTabActive === 'table') {
+                const tbody = document.getElementById('anTableBody');
+                tbody.innerHTML = '';
+                const half = 3;
+                for (let i = Math.max(0, idx-half); i <= Math.min(n-1, idx+half); i++) {
+                    const avgV = i > 0
+                        ? (anRun.distanceData[i]-anRun.distanceData[i-1]) / (parseFloat(anRun.timeData[i])-parseFloat(anRun.timeData[i-1]))
+                        : 0;
+                    const tr = document.createElement('tr');
+                    if (i === idx) tr.className = 'highlight';
+                    tr.innerHTML = `<td>${parseFloat(anRun.timeData[i]).toFixed(3)}</td><td>${anRun.distanceData[i].toFixed(2)}</td><td>${avgV.toFixed(2)}</td><td>${(anRun.speedData[i]||0).toFixed(2)}</td>`;
+                    tbody.appendChild(tr);
+                }
+            }
+
+            if (anTabActive === 'stats') renderAnStats();
+        }
+
+        function renderAnStats() {
+            const el = document.getElementById('anStatsPanel');
+            if (!anRun || !anRun.racingStats) {
+                el.innerHTML = '<p style="color:var(--text-secondary); font-size:12px; text-align:center; margin:20px 0;">No stats saved for this run.</p>';
+                return;
+            }
+            const s = anRun.racingStats;
+            const rows = [
+                ['Total time',       s.totalTime.toFixed(3) + ' s'],
+                ['Total distance',   s.totalDist.toFixed(1) + ' cm'],
+                ['Top speed',        s.topSpd.toFixed(1) + ' cm/s'],
+                ['Avg speed',        s.avgSpd.toFixed(1) + ' cm/s'],
+                ['Time to 50 cm',    s.t50 !== null ? s.t50.toFixed(3) + ' s' : '—'],
+                ['Top speed at',     s.topSpdTime !== null ? s.topSpdTime.toFixed(3) + ' s' : '—'],
+                ['Smoothness (σa)',  s.accelStd.toFixed(1) + ' cm/s²'],
+                ['Laps detected',    s.laps],
+            ];
+            el.innerHTML = rows.map(([l,v]) => `<div class="stats-row"><span class="label">${l}</span><span class="val">${v}</span></div>`).join('');
+        }
+
+        function exportCSV() {
+            if (!anRun) return;
+            let csv = 'Time(s),Distance(cm),Velocity(cm/s)\n';
+            anRun.timeData.forEach((t,i) => csv += `${t},${anRun.distanceData[i].toFixed(3)},${anRun.speedData[i].toFixed(3)}\n`);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+            a.download = 'deriveon_run.csv'; a.click();
+        }
+
+        let chChartInst = new Chart(document.getElementById('chChart').getContext('2d'), {
+            type: 'line',
+            data: { labels:[], datasets:[
+                { label:'Ghost', data:[], borderColor:'#6a6460', borderDash:[5,5], pointRadius:0, tension:0.4, borderWidth:1.5 },
+                { label:'You',   data:[], borderColor:'#c9914a', pointRadius:0, tension:0.4, borderWidth:1.5 }
+            ]},
+            options:{ responsive:true, maintainAspectRatio:false, animation:false,
+                scales:{ x:{grid:{color:'#2a241c'},ticks:{color:'#6a6460'}}, y:{grid:{color:'#2a241c'},ticks:{color:'#6a6460'}} },
+                plugins:{ legend:{ labels:{color:'#c8bfb4', font:{size:11}} } } }
+        });
+
+        let chDuration = 15;
+        function selectDur(d, btn) {
+            chDuration = d;
+            document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        document.getElementById('challengeCamBtn').addEventListener('click', async () => {
+            const vid = document.getElementById('challengeVideo');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                vid.srcObject = stream;
+                vid.play();
+                vid.onloadeddata = () => {
+                    const cvs = document.getElementById('challengeCanvas');
+                    cvs.width  = vid.videoWidth;
+                    cvs.height = vid.videoHeight;
+                    document.getElementById('startChallengeBtn').disabled = false;
+                    document.getElementById('challengeCamBtn').innerText = 'Camera Active';
+                    document.getElementById('challengeCamBtn').disabled = true;
+                };
+            } catch (err) {
+                alert("Camera access denied or unavailable.");
+            }
+        });
+
+        function initChallengeScreen() {
+            const selA = document.getElementById('chRunA');
+            const selB = document.getElementById('chRunB');
+            const opts = savedRuns.map((r,i) => `<option value="${i}">Run ${i+1} — ${r.date}</option>`).join('');
+            selA.innerHTML = opts; selB.innerHTML = opts;
+            if (savedRuns.length > 1) selB.value = 1;
+        }
+
+        function buildGhostFromTwo(idxA, idxB, dur) {
+            const rA = savedRuns[idxA], rB = savedRuns[idxB];
+            if (!rA || !rB) return [];
+            const step = 0.1;
+            const result = [];
+            for (let t = 0; t <= dur; t = Math.round((t + step)*10)/10) {
+                const dA = interpDist(rA, t);
+                const dB = interpDist(rB, t);
+                const base = (dA + dB) / 2;
+                const noise = base * 0.03 * (Math.random()*2 - 1) * Math.exp(-Math.random());
+                result.push({ t, d: Math.max(0, base + noise) });
+            }
+            return result;
+        }
+
+        function interpDist(run, t) {
+            const times = run.timeData.map(parseFloat);
+            const dists = run.distanceData;
+            if (t <= times[0]) return 0;
+            if (t >= times[times.length-1]) return dists[dists.length-1];
+            for (let i = 1; i < times.length; i++) {
+                if (times[i] >= t) {
+                    const frac = (t - times[i-1]) / (times[i] - times[i-1]);
+                    return dists[i-1] + frac * (dists[i] - dists[i-1]);
+                }
+            }
+            return dists[dists.length-1];
+        }
+
+        function startChallenge() {
+            if (savedRuns.length < 1) return alert('Save at least one tracking run first!');
+            const idxA = parseInt(document.getElementById('chRunA').value);
+            const idxB = parseInt(document.getElementById('chRunB').value);
+            const ghostData = buildGhostFromTwo(idxA, idxB, chDuration);
+
+            const vid = document.getElementById('challengeVideo');
+            const cvs = document.getElementById('challengeCanvas');
+            cvs.width = vid.videoWidth; cvs.height = vid.videoHeight;
+
+            const cctx = cvs.getContext('2d');
+            
+            const doSetup = () => {
+                cctx.drawImage(vid, 0, 0, cvs.width, cvs.height);
+                cctx.fillStyle = 'rgba(0,0,0,0.55)';
+                cctx.fillRect(0, 0, cvs.width, cvs.height);
+                cctx.drawImage(vid, 0, 0, cvs.width, cvs.height);
+                document.getElementById('deltaDisplay').innerText = 'Draw box around car, then release';
+                document.getElementById('deltaDisplay').style.color = 'var(--accent)';
+
+                let bx0=0, by0=0, bDrawing=false;
+                cvs.style.cursor = 'crosshair';
+
+                cvs.onmousedown = ev => {
+                    const r = cvs.getBoundingClientRect();
+                    bx0 = ev.clientX - r.left; by0 = ev.clientY - r.top; bDrawing = true;
+                };
+                cvs.onmousemove = ev => {
+                    if (!bDrawing) return;
+                    const r = cvs.getBoundingClientRect();
+                    cctx.drawImage(vid, 0, 0, cvs.width, cvs.height);
+                    cctx.strokeStyle = '#c9914a'; cctx.lineWidth = 2;
+                    cctx.strokeRect(bx0, by0, (ev.clientX-r.left)-bx0, (ev.clientY-r.top)-by0);
+                };
+                cvs.onmouseup = ev => {
+                    bDrawing = false;
+                    cvs.onmousedown = null; cvs.onmousemove = null; cvs.onmouseup = null;
+                    cvs.style.cursor = 'default';
+                    const r = cvs.getBoundingClientRect();
+                    const bw = Math.abs((ev.clientX-r.left) - bx0);
+                    runCountdown(3, () => launchRace(ghostData, vid, cvs));
+                };
+            };
+            
+            doSetup(); // Fire immediately on live camera stream
+        }
+
+        function runCountdown(n, cb) {
+            const el = document.getElementById('chCountdown');
+            el.style.display = 'flex';
+            el.innerText = n;
+            if (n <= 0) { 
+                el.style.display = 'none'; 
+                playGo();
+                cb(); 
+                return; 
+            }
+            playBeep();
+            setTimeout(() => runCountdown(n-1, cb), 1000);
+        }
+
+        function launchRace(ghostData, vid, cvs) {
+            document.getElementById('deltaDisplay').innerText = 'GO!';
+            document.getElementById('deltaDisplay').style.color = 'var(--success)';
+
+            chChartInst.data.labels = ghostData.map(g => g.t);
+            chChartInst.data.datasets[0].data = ghostData.map(g => g.d);
+            chChartInst.data.datasets[1].data = []; chChartInst.update();
+
+            const btn = document.getElementById('startChallengeBtn');
+            btn.disabled = true;
+
+            const liveData = [];
+            
+            let startTime = performance.now();
+            runCVLoop(vid, cvs, liveData, startTime);
+
+            const ticker = setInterval(() => {
+                let liveElapsed = (performance.now() - startTime) / 1000;
+                
+                if (vid.paused || vid.ended || liveElapsed >= chDuration) {
+                    vid.pause(); // Freeze feed at end of race
+                    clearInterval(ticker);
+                    let sqErr = 0, cnt = 0;
+                    liveData.forEach(l => {
+                        const gRef = ghostData.find(g => g.t >= l.t);
+                        if (gRef) { sqErr += (l.d - gRef.d)**2; cnt++; }
+                    });
+                    const mse = cnt ? sqErr/cnt : 9999;
+                    const grade = mse < 20 ? 'S' : mse < 100 ? 'A' : mse < 250 ? 'B' : 'C';
+                    document.getElementById('chGrade').innerText = grade;
+
+                    const finalDist = liveData.length ? liveData[liveData.length-1].d : 0;
+                    const ghostFinalDist = ghostData[ghostData.length-1].d;
+                    document.getElementById('chResultBody').innerHTML = `
+                        <div class="stats-row"><span class="label">Grade</span><span class="val" style="font-size:22px; color:var(--accent);">${grade}</span></div>
+                        <div class="stats-row"><span class="label">MSE vs ghost</span><span class="val">${mse.toFixed(1)} cm²</span></div>
+                        <div class="stats-row"><span class="label">Your dist</span><span class="val">${finalDist.toFixed(1)} cm</span></div>
+                        <div class="stats-row"><span class="label">Ghost dist</span><span class="val">${ghostFinalDist.toFixed(1)} cm</span></div>
+                        <div class="stats-row"><span class="label">Duration</span><span class="val">${chDuration}s</span></div>
+                    `;
+                    document.getElementById('chResultPanel').style.display = 'block';
+                    btn.disabled = false;
+                    document.getElementById('challengeCamBtn').innerText = 'Start Camera';
+                    document.getElementById('challengeCamBtn').disabled = false;
+                    return;
+                }
+                if (!liveData.length) return;
+                const curr = liveData[liveData.length-1];
+                const gRef = ghostData.find(g => g.t >= curr.t) || ghostData[ghostData.length-1];
+                const delta = curr.d - gRef.d;
+                document.getElementById('chGhostDist').innerText = gRef.d.toFixed(1);
+                document.getElementById('chYourDist').innerText  = curr.d.toFixed(1);
+                const dEl = document.getElementById('deltaDisplay');
+                dEl.innerText = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)} cm  (${delta >= 0 ? 'Ahead' : 'Behind'})`;
+                dEl.style.color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
+                if (liveData.length % 5 === 0) { chChartInst.data.datasets[1].data.push(curr.d); chChartInst.update('none'); }
+            }, 100);
+        }
+
+        // Updated for Live Feed Relative Timestamps in Challenge Mode
+        function runCVLoop(vid, cvs, dataArr, startTimeOverride = null) {
+            const W = vid.videoWidth, H = vid.videoHeight;
+            let src_  = new cv.Mat(H, W, cv.CV_8UC4);
+            let hsv_  = new cv.Mat(H, W, cv.CV_8UC3);
+            let mask_ = new cv.Mat(H, W, cv.CV_8UC1);
+            let cap_  = new cv.VideoCapture(vid);
+            let lCx = null, lCy = null, lT = 0, cumD = 0, lPrx, lPry;
+
+            function frame() {
+                if (vid.paused || vid.ended) { src_.delete(); hsv_.delete(); mask_.delete(); return; }
+                if (vid.readyState < 2) { requestAnimationFrame(frame); return; }
+                try { cap_.read(src_); if (src_.empty()) throw 0; } catch { requestAnimationFrame(frame); return; }
+
+                cv.cvtColor(src_, hsv_, cv.COLOR_RGBA2RGB);
+                cv.cvtColor(hsv_, hsv_, cv.COLOR_RGB2HSV);
+                let lb_ = new cv.Mat(hsv_.rows, hsv_.cols, hsv_.type(), hsvLow);
+                let hb_ = new cv.Mat(hsv_.rows, hsv_.cols, hsv_.type(), hsvHigh);
+                cv.inRange(hsv_, lb_, hb_, mask_);
+                let ctrs = new cv.MatVector(), hier = new cv.Mat();
+                cv.findContours(mask_, ctrs, hier, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+                let bI = -1, mxA = 0;
+                for (let i = 0; i < ctrs.size(); i++) { let a = cv.contourArea(ctrs.get(i)); if (a > 10 && a > mxA) { mxA = a; bI = i; } }
+                if (bI !== -1) {
+                    let mm = cv.moments(ctrs.get(bI), false);
+                    let cx = mm.m10/mm.m00, cy = mm.m01/mm.m00;
+                    let rx, ry;
+                    if (perspMatrix) {
+                        let pt = cv.matFromArray(1,1,cv.CV_32FC2,[cx,cy]), dt = new cv.Mat();
+                        cv.perspectiveTransform(pt, dt, perspMatrix); rx = dt.data32F[0]; ry = dt.data32F[1]; pt.delete(); dt.delete();
+                    } else { rx = cx * (scale||1); ry = cy * (scale||1); }
+                    
+                    // ── POSITION SMOOTHING FOR GHOST MODE ──
+                    const posAlpha = 0.4;
+                    if (lPrx !== undefined) {
+                        rx = posAlpha * rx + (1 - posAlpha) * lPrx;
+                        ry = posAlpha * ry + (1 - posAlpha) * lPry;
+                    }
+                    
+                    let cT = startTimeOverride ? (performance.now() - startTimeOverride) / 1000 : vid.currentTime;
+                    cT = parseFloat(cT.toFixed(3));
+                    
+                    if (cT > lT) {
+                        let step = (lPrx !== undefined) ? Math.hypot(rx-lPrx, ry-lPry) : 0;
+                        cumD += step;
+                        dataArr.push({ t: cT, d: cumD });
+                        lT = cT;
+                    }
+                    lCx = cx; lCy = cy; lPrx = rx; lPry = ry;
+                    cv.circle(src_, new cv.Point(cx,cy), 8, [201,145,74,255], 2);
+                    cv.imshow(cvs.id, src_);
+                }
+                lb_.delete(); hb_.delete(); ctrs.delete(); hier.delete();
+                requestAnimationFrame(frame);
+            }
+            frame();
+        }
+
+        function toggleGraphVisibility() {
+            const isLowEnd = document.getElementById('lowEndMode').checked;
+            const graphsPanel = document.querySelector('.graphs-panel');
+            if (graphsPanel) {
+                graphsPanel.style.display = isLowEnd ? 'none' : 'flex';
+            }
+        }
+    </script>
+</body>
+</html>
